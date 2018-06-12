@@ -1,5 +1,6 @@
 /*jslint node: true */
 "use strict";
+var http = require('http');
 
 var ValidationUtils = require("trustnote-common/validation_utils.js");
 var db = require('trustnote-common/db.js');
@@ -40,14 +41,17 @@ function sendLockResponse(from_address, account_address, amount, locking_term){
 	getSharedAddress(from_address, account_address, amount, deadline, function(shared_address, err) {
 		if (err) 
 			return sendMessageToDevice(from_address, 'Something wrong happend:\n' + err);
-		sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+timestampToDate(stopline)+' or you will not get any interest');
-		sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
-	})
+		db.qurey('update lockups set shared_address=? where from_address=? and term=?', [shared_address, from_address, term], function(){
+			var res = http.get(''+shared_address+'&'+from_address);
+			sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+timestampToDate(stopline)+' or you will not get any interest');
+			sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
+		});
+	});
 }
 
 function prePurchaseLockUp(from_address, address, amount, term) {
 	db.qurey('insert into lockups(from_address, address, amount, term) value(?,?,?,?)', [from_address, address, amount, term], function(){
-		sendMessageToDevice(from_address, '请支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
+		sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
 		sendMessageToDevice('[0.1MN](TTT:'+botAddress+'?amount=100000)');
 		return;
 	})

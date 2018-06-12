@@ -6,8 +6,9 @@ var conf = require('trustnote-common/conf.js');
 var eventBus = require('trustnote-common/event_bus.js');
 var headlessWallet = require('trustnote-headless');
 var desktopApp = require('trustnote-common/desktop_app.js');
-var SendLockResponse = require('./split_lock.js');
 var db = require('trustnote-common/db.js');
+
+var sendLockups = require('./lockup.js');
 
 const SESSION_TIMEOUT = 600*1000;
 const DEFAULT_GREETING = 'Hello, this is trustnote-bot. How may I help you?'
@@ -71,7 +72,7 @@ eventBus.on('text', function(from_address, text){
 	text = text.trim();
 	// for debug, to test client's and bot's connection status
 	if (text.match(/hello/i))
-		return sendMessageToDevice(from_address, 'Hello, how may I help you?');
+		return sendMessageToDevice(from_address, DEFAULT_GREETING);
 
 	// pre-purchase lockup
 	if (text.match(/[A-Z2-7]{32}#\d+MN#\d+/)) {
@@ -79,36 +80,47 @@ eventBus.on('text', function(from_address, text){
 		var arrNumbers = text.match(/\d+/g);
 		var amount = arrNumbers[0];
 		var term = arrNumbers[1];
-		return SendLockResponse.prePurchaseLockUp(from_address, address, amount, term);
+		return sendLockups.prePurchaseLockUp(from_address, address, amount, term);
 	}
 
 	// return lockup status
 	if (text.match(/\d+天/)){
-		var days = text.match(/\d+/);
-		var res = http.get('');
-		sendMessageToDevice(from_address, res);
+		var term = text.match(/\d+/);
+		var res = http.get(''+days);
+		lockup_menu[days] = res[days];
+		sendMessageToDevice(from_address, lockup_menu);
 		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额#锁仓天数”的格式发送给bot，bot在将会指导您接下来的购买操作');
 		return;
 	}
+
+	// get users lockup status
+	// if sent === 0 means users didn't pay the commission
+	// if sent === 1 means the commission has been paid
+	if (text.match(/我的合约状态/)){
+		var res = http.get(''+from_address);
+		db.query('select * from lockups where from_address=?',[from_address], function(rows){
+			return sendMessageToDevice(from_address, res);
+		});
+	}
 	
 	// match lock command, for example: [10MN][LOCK](TTT:B7ILVVZNBORPNS4ES6KH2C5HW3NTM55B?amount=10000000&term=3months);
-	var arrLock = text.match(/\[\d+ MN\]\[LOCK\]\(TTT:[A-Z2-7]{32}\?amount=\d+\&term=\d+(minutes|months|years)\)/g);
-	if (arrLock){
-		var address = text.match(/\b[A-Z2-7]{32}\b/)[0];
-		var arrNumbers = text.match(/\d+/g);
-		var amount = arrNumbers[0];
-		var term = arrNumbers[arrNumbers.length-1];
-		var type = text.match(/(minutes|months|years)/)[0];
-		return SendLockResponse.sendLockResponse(from_address, address, amount, term);
-	}
+	// var arrLock = text.match(/\[\d+ MN\]\[LOCK\]\(TTT:[A-Z2-7]{32}\?amount=\d+\&term=\d+(minutes|months|years)\)/g);
+	// if (arrLock){
+	// 	var address = text.match(/\b[A-Z2-7]{32}\b/)[0];
+	// 	var arrNumbers = text.match(/\d+/g);
+	// 	var amount = arrNumbers[0];
+	// 	var term = arrNumbers[arrNumbers.length-1];
+	// 	var type = text.match(/(minutes|months|years)/)[0];
+	// 	return SendLockResponse.sendLockResponse(from_address, address, amount, term);
+	// }
 });
 
 // validate commission and create lockup address
 eventBus.on('payment', function(from_address, unit){
 	// validate commission is sent to bot
-	db.query('select * from units join outputs using (unit) where unit=? and address=?', [unit, botAddress], function(rows){
+	db.query('select * from units join outputs using (unit) where unit=? and address=? and amount>=100000', [unit, botAddress], function(rows){
 		if(rows.length===0){
-			sendMessageToDevice(from_address, '未收到手续费或手续费未发给bot');
+			sendMessageToDevice(from_address, '未收到手续费或手续费未发给bot或者费用不足0.1MN');
 			return;
 		}
 		// validate commission is unused
@@ -126,7 +138,8 @@ eventBus.on('payment', function(from_address, unit){
 					var amount = rows[0].amount;
 					var term = rows[0].term;
 					// send result to user
-					SendLockResponse.sendLockResponse(from_address, address, amount, term);
+					sendLockups.sendLockResponse(from_address, address, amount, term);
+					// update shared address status
 					db.query('update used_commission set sent=1 where from_address=?', [from_address],function(){
 						// send result to server
 						return http.get('');
