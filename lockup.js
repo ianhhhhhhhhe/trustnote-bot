@@ -134,3 +134,4 @@ function onError(err){
 
 exports.sendLockResponse = purchaseLockup;
 exports.prePurchaseLockUp = prePurchaseLockUp;
+exports.purchaseLockup = purchaseLockup;
