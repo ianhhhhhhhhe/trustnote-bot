@@ -19,7 +19,7 @@ function sendMessageToDevice(device_address, text){
 }
 
 function prePurchaseLockUp(from_address, address, amount, term) {
-	db.qurey('insert into lockups(from_address, address, amount, term) value(?,?,?,?)', [from_address, address, amount, term], function(){
+	db.qurey('insert into lockups(from_address, address, amount, term, sent) value(?,?,?,?,0)', [from_address, address, amount, term], function(){
 		sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
 		sendMessageToDevice('[0.1MN](TTT:'+botAddress+'?amount=100000)');
 		return;
@@ -40,8 +40,10 @@ function purchaseLockup(from_address, account_address, amount, locking_term, unl
 		if (err) {
 			return sendMessageToDevice(from_address, 'Something wrong happend:\n' + err);
 		}
-		db.qurey('update lockups set shared_address=? where from_address=? and term=?', [shared_address, from_address, term], function(){
+		db.qurey('update lockups set shared_address=?, sent=1 where from_address=? and term=?', [shared_address, from_address, term], function(){
+			// send result to server
 			var res = http.get(''+shared_address+'&'+from_address);
+			// send result to user
 			sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+timestampToDate(stopline)+' or you will not get any interest');
 			sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
 		});

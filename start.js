@@ -143,13 +143,8 @@ eventBus.on('payment', function(from_address, unit){
 					var address = rows[0].address;
 					var amount = rows[0].amount;
 					var term = rows[0].term;
-					// send result to user
+					// create and store shared address, send result to user and server
 					sendLockups.purchaseLockup(from_address, address, amount, term);
-					// update shared address status
-					db.query('update used_commission set sent=1 where from_address=?', [from_address],function(){
-						// send result to server
-						return http.get('');
-					})
 				});
 			});
 		});

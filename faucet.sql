@@ -13,7 +13,8 @@ CREATE TABLE lockups (
 	address CHAR(32) NOT,
 	amount INTEGER NOT NULL,
 	term INTEGER NOT NULL,
-	shared_address CHAR(32) NULL
+	shared_address CHAR(32) NULL,
+	sent INTEGER NULL,
 );
 
 CREATE TABLE used_commission (
