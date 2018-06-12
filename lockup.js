@@ -18,37 +18,6 @@ function sendMessageToDevice(device_address, text){
 	device.sendMessageToDevice(device_address, 'text', text);
 }
 
-function sendLockResponse(from_address, account_address, amount, locking_term){
-	// send service some messages
-	// from_address, amount, term
-	// check if the shared address exists
-	// check if bot get 0.1MN from client
-	// check if shared address have required amount
-	switch(term_type){
-		case 'minutes':
-			var deadline = Date.now() + Math.round(locking_term * MINUTE);
-			break;
-		case 'months':
-			var deadline = Date.now() + Math.round(locking_term * MONTH);
-			break;
-		case 'years':
-			var deadline = Date.now() + Math.round(locking_term * YEAR);
-			break;
-		default:
-		    return sendMessageToDevice(from_address, 'Unkown time');
-	};
-	// sendMessageToDevice(from_address, 'GOOD');
-	getSharedAddress(from_address, account_address, amount, deadline, function(shared_address, err) {
-		if (err) 
-			return sendMessageToDevice(from_address, 'Something wrong happend:\n' + err);
-		db.qurey('update lockups set shared_address=? where from_address=? and term=?', [shared_address, from_address, term], function(){
-			var res = http.get(''+shared_address+'&'+from_address);
-			sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+timestampToDate(stopline)+' or you will not get any interest');
-			sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
-		});
-	});
-}
-
 function prePurchaseLockUp(from_address, address, amount, term) {
 	db.qurey('insert into lockups(from_address, address, amount, term) value(?,?,?,?)', [from_address, address, amount, term], function(){
 		sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
@@ -57,7 +26,29 @@ function prePurchaseLockUp(from_address, address, amount, term) {
 	})
 }
 
-function getSharedAddress(from_address, address, amount, deadline, callback) {
+function purchaseLockup(from_address, account_address, amount, locking_term, unlock_date){
+	// send service some messages
+	// from_address, amount, term
+	// check if the shared address exists
+	// check if bot get 0.1MN from client
+	// check if shared address have required amount
+	// sendMessageToDevice(from_address, 'GOOD');
+	if(!from_address || !account_address || !amount ||! unlock_date){
+		return sendMessageToDevice(from_address, 'Lack some important message');
+	}
+	getSharedAddress(from_address, account_address, amount, unlock_date, function(shared_address, err) {
+		if (err) {
+			return sendMessageToDevice(from_address, 'Something wrong happend:\n' + err);
+		}
+		db.qurey('update lockups set shared_address=? where from_address=? and term=?', [shared_address, from_address, term], function(){
+			var res = http.get(''+shared_address+'&'+from_address);
+			sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+timestampToDate(stopline)+' or you will not get any interest');
+			sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
+		});
+	});
+}
+
+function getSharedAddress(from_address, address, amount, unlock_date, callback) {
 	if (!ValidationUtils.isValidAddress(address))
 		return sendMessageToDevice(from_address, 'Please send a valid address');
 	// sendMessageToDevice(from_address, 'Building shared address');
@@ -67,7 +58,7 @@ function getSharedAddress(from_address, address, amount, deadline, callback) {
 	var arrDefinition = ['or', [
 		['and', [
 			['address', address],
-			['in data feed', [[configBot.TIMESTAMPER_ADDRESS], 'timestamp', '>', deadline]]
+			['in data feed', [[configBot.TIMESTAMPER_ADDRESS], 'timestamp', '>', unlock_date]]
 		]],
 		['and', [
 			['address', botAddress],
@@ -139,5 +130,5 @@ function onError(err){
 	throw Error(err);
 }
 
-exports.sendLockResponse = sendLockResponse;
+exports.sendLockResponse = purchaseLockup;
 exports.prePurchaseLockUp = prePurchaseLockUp;

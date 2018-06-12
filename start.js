@@ -76,20 +76,25 @@ eventBus.on('text', function(from_address, text){
 
 	// pre-purchase lockup
 	if (text.match(/[A-Z2-7]{32}#\d+MN#\d+/)) {
+		// get user's address
 		var address = text.match(/\b[A-Z2-7]{32}\b/)[0];
 		var arrNumbers = text.match(/\d+/g);
+		// get lockup amount
 		var amount = arrNumbers[0];
+		// get lockup term
 		var term = arrNumbers[1];
-		return sendLockups.prePurchaseLockUp(from_address, address, amount, term);
+		// get unlock date
+		var unlock_date = lockup_menu[term].unlock_date;
+		return sendLockups.prePurchaseLockUp(from_address, address, amount, term, unlock_date);
 	}
 
 	// return lockup status
 	if (text.match(/\d+天/)){
 		var term = text.match(/\d+/);
-		var res = http.get(''+days);
-		lockup_menu[days] = res[days];
+		var res = http.get(''+term);
+		lockup_menu[term] = res[term];
 		sendMessageToDevice(from_address, lockup_menu);
-		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额#锁仓天数”的格式发送给bot，bot在将会指导您接下来的购买操作');
+		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额#合约ID”的格式发送给bot，bot在将会指导您接下来的购买操作');
 		return;
 	}
 
@@ -97,6 +102,7 @@ eventBus.on('text', function(from_address, text){
 	// if sent === 0 means users didn't pay the commission
 	// if sent === 1 means the commission has been paid
 	if (text.match(/我的合约状态/)){
+		// get users payment status from server
 		var res = http.get(''+from_address);
 		db.query('select * from lockups where from_address=?',[from_address], function(rows){
 			return sendMessageToDevice(from_address, res);
@@ -138,7 +144,7 @@ eventBus.on('payment', function(from_address, unit){
 					var amount = rows[0].amount;
 					var term = rows[0].term;
 					// send result to user
-					sendLockups.sendLockResponse(from_address, address, amount, term);
+					sendLockups.purchaseLockup(from_address, address, amount, term);
 					// update shared address status
 					db.query('update used_commission set sent=1 where from_address=?', [from_address],function(){
 						// send result to server
