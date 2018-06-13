@@ -36,3 +36,6 @@ Session.vim
 .netrwhist
 *~
 
+# Test Files
+
+test*
