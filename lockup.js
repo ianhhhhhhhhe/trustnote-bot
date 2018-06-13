@@ -12,6 +12,7 @@ var DAY = HOUR * 24
 var MONTH = DAY * 30;
 var YEAR = DAY * 365;
 var botAddress = 'B7ILVVZNBORPNS4ES6KH2C5HW3NTM55B';
+var url = '';
 
 function sendMessageToDevice(device_address, text){
 	var device = require('trustnote-common/device.js');
@@ -27,12 +28,8 @@ function prePurchaseLockUp(from_address, address, amount, term) {
 }
 
 function purchaseLockup(from_address, account_address, amount, locking_term, unlock_date){
-	// send service some messages
-	// from_address, amount, term
-	// check if the shared address exists
-	// check if bot get 0.1MN from client
-	// check if shared address have required amount
-	// sendMessageToDevice(from_address, 'GOOD');
+	// create shared address and send it to user
+	// store the result and send it to server
 	if(!from_address || !account_address || !amount ||! unlock_date){
 		return sendMessageToDevice(from_address, 'Lack some important message');
 	}

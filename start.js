@@ -1,6 +1,5 @@
 /*jslint node: true */
 "use strict";
-var http = require('http');
 
 var conf = require('trustnote-common/conf.js');
 var eventBus = require('trustnote-common/event_bus.js');
@@ -8,6 +7,7 @@ var headlessWallet = require('trustnote-headless');
 var desktopApp = require('trustnote-common/desktop_app.js');
 var db = require('trustnote-common/db.js');
 
+var network = require('./network.js');
 var sendLockups = require('./lockup.js');
 
 const SESSION_TIMEOUT = 600*1000;
@@ -15,6 +15,7 @@ const DEFAULT_GREETING = 'Hello, this is trustnote-bot. How may I help you?'
 var lockup_menu;
 var assocSessions = {};
 var botAddress = 'B7ILVVZNBORPNS4ES6KH2C5HW3NTM55B';
+var url = '';
 
 function resumeSession(device_address){
 	if (!assocSessions[device_address])
@@ -39,17 +40,16 @@ function sendMessageToDevice(device_address, text){
 
 function sendGreeting(device_address){
 	// get lockup service information
-	var res = http.get('');
-	lockup_menu = JSON.parse(res);
+	lockup_menu = network.getLockUpMenu(device_address, url, '/financial/home.htm');
 	sendMessageToDevice(device_address, lockup_menu);
 	// sendMessageToDevice(device_address, DEFAULT_GREETING);
 	assocSessions[device_address].greeting_ts = Date.now();
+	
 }
 
 eventBus.on('headless_wallet_ready', function(){
 	// get lockup service information
-	var res = http.get('');
-	lockup_menu = JSON.parse(res);
+	lockupmenu = network.getLockUpMenu(device_address, url, '/financial/home.htm');
 	if (!conf.admin_email || !conf.from_email){
 		console.log("please specify admin_email and from_email in your "+desktopApp.getAppDataDir()+'/conf.json');
 		process.exit(1);
@@ -91,7 +91,7 @@ eventBus.on('text', function(from_address, text){
 	// return lockup status
 	if (text.match(/\d+天/)){
 		var term = text.match(/\d+/);
-		var res = http.get(''+term);
+		var res = network.getLockUpInfo(from_address, url, '/financial/update.htm', {});
 		lockup_menu[term] = res[term];
 		sendMessageToDevice(from_address, lockup_menu);
 		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额#合约ID”的格式发送给bot，bot在将会指导您接下来的购买操作');
