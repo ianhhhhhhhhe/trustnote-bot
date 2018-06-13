@@ -10,11 +10,11 @@ CREATE INDEX faucetByDeviceAddressDate ON faucet_payouts(device_address, creatio
 
 CREATE TABLE lockups (
 	from_address CHAR(33) NOT NULL,
-	address CHAR(32) NOT,
+	address CHAR(32) NOT NULL,
 	amount INTEGER NOT NULL,
 	term INTEGER NOT NULL,
 	shared_address CHAR(32) NULL,
-	sent INTEGER NULL,
+	sent INTEGER NULL
 );
 
 CREATE TABLE used_commission (
