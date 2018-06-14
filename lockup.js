@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
-var http = require('http');
-
 var ValidationUtils = require("trustnote-common/validation_utils.js");
 var db = require('trustnote-common/db.js');
+
+var network = require('./network.js');
 var configBot = require('./conf.js');
+var util = require('./util.js');
 
 var MINUTE = 60 * 1000;
 var HOUR = MINUTE * 60;
@@ -19,12 +20,20 @@ function sendMessageToDevice(device_address, text){
 	device.sendMessageToDevice(device_address, 'text', text);
 }
 
-function prePurchaseLockUp(from_address, address, amount, term) {
-	db.qurey('insert into lockups(from_address, address, amount, term, sent) value(?,?,?,?,0)', [from_address, address, amount, term], function(){
-		sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
-		sendMessageToDevice('[0.1MN](TTT:'+botAddress+'?amount=100000)');
-		return;
+function prePurchaseLockUp(from_address, address, amount, lockupId) {
+	db.query('select * from lockups where from_address=? and sent=0', [from_address], function(rows){
+		if(rows.length!==0){
+			sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓')
+			return;
+		}
+		db.query('insert into lockups (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
+			sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
+			// sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
+			// sendMessageToDevice('[0.1MN](TTT:'+botAddress+'?amount=100000)');
+			return;
+		})
 	})
+	
 }
 
 function purchaseLockup(from_address, account_address, amount, locking_term, unlock_date){
@@ -37,12 +46,13 @@ function purchaseLockup(from_address, account_address, amount, locking_term, unl
 		if (err) {
 			return sendMessageToDevice(from_address, 'Something wrong happend:\n' + err);
 		}
-		db.qurey('update lockups set shared_address=?, sent=1 where from_address=? and term=?', [shared_address, from_address, term], function(){
+		db.query('update lockups set shared_address=?, sent=1 where from_address=? and term=?', [shared_address, from_address, term], function(){
 			// send result to server
-			var res = http.get(''+shared_address+'&'+from_address);
-			// send result to user
-			sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+timestampToDate(stopline)+' or you will not get any interest');
-			sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
+			network.postUserStatus(from_address, shared_address, lockupId, amount, function(){
+				// send result to user
+				sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+util.timestampToDate(stopline)+' or you will not get any interest');
+				sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
+			})
 		});
 	});
 }
@@ -112,17 +122,6 @@ function getSharedAddress(from_address, address, amount, unlock_date, callback) 
 			composer.composeJoint(params);
 		}
 	});
-}
-
-function timestampToDate(timestamp) {
-	var datetime = timestamp ? new Date(timestamp) : new Date(Date.now() + Math.round(DAY));
-	var year = datetime.getFullYear();
-	var month = datetime.getMonth();
-	var date = datetime.getDate();
-	var hours = datetime.getHours();
-	var minutes = datetime.getMinutes();
-	var seconds = datetime.getSeconds()
-	return year + '/' + month + '/' + date + ' ' + hours + ':' + minutes + ':' + seconds;
 }
 
 function onError(err){
