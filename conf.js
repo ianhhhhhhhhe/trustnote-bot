@@ -22,5 +22,6 @@ exports.MAX_AMOUNT_IN_KB = 100;
 exports.KEYS_FILENAME = 'keys.json';
 
 exports.TIMESTAMPER_ADDRESS = 'UABSDF77S6SU4FDAXWTYIODVODCAA22A';
+exports.server_url = 'https://testactivity.trustnote.org';
 
 console.log('finished faucet conf');

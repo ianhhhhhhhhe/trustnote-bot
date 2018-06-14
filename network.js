@@ -2,44 +2,83 @@
 "use strict";
 
 var request = require('request');
+var conf = require('./conf.js');
 
-function getLockUpMenu(device_address, url, api){
-	request.get(url + api, function(error, response, body) {
+var url = conf.server_url;
+
+function getLockupMenu(api, callback){
+	request({
+        url: url + api,
+        method: 'GET',
+        headers:{
+            Referer: 'localhost',
+            Origin: 'http://localhost:8080'}
+        }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			console.log(body);
-			return body.entity;
+            var result = JSON.parse(body);
+            // console.log('Menu: ' + result);
+			callback(result["entity"]);
+		} else {
+            if (error){
+                callback('', error);
+            }
+        }
+	});
+}
+
+function getLockupInfo(api, lockupID, callback){
+    request({
+        url: url + api + '/' + lockupID,
+        method: 'GET',
+        headers:{
+            Referer: 'localhost',
+            Origin: 'http://localhost:8080'}
+        }, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+            var result = JSON.parse(body);
+            // console.log('Menu: ' + result);
+			callback(result["entity"]);
+		} else {
+            if (error){
+                callback('', error);
+            }
+        }
+	});
+}
+
+function getUserStatus(device_address, callback) {
+    request({
+        url: url + api,
+        method: 'GET',
+        headers:{
+            Referer: 'localhost',
+            Origin: 'http://localhost:8080'}
+        }, function(error, response, body) {
+		if (!error && response.statusCode == 200) {
+            var result = JSON.parse(body);
+            // console.log('Menu: ' + result);
+			callback(result["entity"]);
 		}
 	});
 }
 
-function getLockUpInfo(device_address, url, api, lockupID){
-	request.get(url + api + '?financialId=' + lockupID, function(error, response, body) {
+function postUserStatus(amount, lockupId, callback) {
+    request({
+        url: url + api,
+        method: 'POST',
+        headers:{
+            Referer: 'localhost',
+            Origin: 'http://localhost:8080'}
+        }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			console.log(body);
-            return body;
-        }
+            var result = JSON.parse(body);
+            // console.log('Menu: ' + result);
+			callback(result["entity"]);
+		}
 	});
 }
 
-function getUserStatus(device_address, url) {
-    request.get(url + '?deviceAddress=' + device_address, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-			console.log(body);
-            return body;
-        }
-    });
-}
-
-function postUserStatus(device_address, url, shared_address, amount, lockupID) {
-    request.post(url , {}, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-			console.log(body);
-            return body;
-        }
-    });
-}
-
-exports.getLockUpInfo = getLockUpInfo;
-exports.getLockUpMenu = getLockUpMenu;
+exports.getLockupInfo = getLockupInfo;
+exports.getLockUpMenu = getLockupMenu;
 exports.getUserStatus = getUserStatus;
 exports.postUserStatus = postUserStatus;
