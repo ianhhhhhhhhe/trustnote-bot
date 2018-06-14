@@ -21,6 +21,8 @@ function getLockupMenu(api, callback){
 		} else {
             if (error){
                 callback('', error);
+            } else if (response.statusCode != 200) {
+                callback('', error, response.statusCode);
             }
         }
 	});
@@ -28,7 +30,7 @@ function getLockupMenu(api, callback){
 
 function getLockupInfo(api, lockupID, callback){
     request({
-        url: url + api + '/' + lockupID,
+        url: url + api + '?financialId=' + lockupID,
         method: 'GET',
         headers:{
             Referer: 'localhost',
@@ -56,13 +58,17 @@ function getUserStatus(device_address, callback) {
         }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
+            var res = {};
+            res["menu"] = result["entity"];
+            res["participants"] = result["participants"];
+            res["reset_limit"] = result["reset_limit"];
             // console.log('Menu: ' + result);
-			callback(result["entity"]);
+			callback(res);
 		}
 	});
 }
 
-function postUserStatus(amount, lockupId, callback) {
+function postUserStatus(from_address, shared_address, lockupId, amount, callback) {
     request({
         url: url + api,
         method: 'POST',
@@ -79,6 +85,6 @@ function postUserStatus(amount, lockupId, callback) {
 }
 
 exports.getLockupInfo = getLockupInfo;
-exports.getLockUpMenu = getLockupMenu;
+exports.getLockupMenu = getLockupMenu;
 exports.getUserStatus = getUserStatus;
 exports.postUserStatus = postUserStatus;
