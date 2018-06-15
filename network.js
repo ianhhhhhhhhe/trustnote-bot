@@ -43,6 +43,8 @@ function getLockupInfo(api, lockupID, callback){
 		} else {
             if (error){
                 callback('', error);
+            } else if (response.statusCode != 200) {
+                callback('', error, response.statusCode);
             }
         }
 	});
@@ -64,7 +66,13 @@ function getUserStatus(device_address, callback) {
             res["reset_limit"] = result["reset_limit"];
             // console.log('Menu: ' + result);
 			callback(res);
-		}
+		} else {
+            if (error){
+                callback('', error);
+            } else if (response.statusCode != 200) {
+                callback('', error, response.statusCode);
+            }
+        }
 	});
 }
 
@@ -80,7 +88,13 @@ function postUserStatus(from_address, shared_address, lockupId, amount, callback
             var result = JSON.parse(body);
             // console.log('Menu: ' + result);
 			callback(result["entity"]);
-		}
+		} else {
+            if (error){
+                callback('', error);
+            } else if (response.statusCode != 200) {
+                callback('', error, response.statusCode);
+            }
+        }
 	});
 }
 

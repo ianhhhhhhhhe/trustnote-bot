@@ -50,7 +50,28 @@ function sendGreeting(device_address){
 			return sendMessageToDevice(device_address, '活动尚未开启，敬请期待')
 		}
 		res.map(function(lockup){
-			lockup_list[res["id"]] = lockup;
+			lockup_list[lockup["id"]] = lockup;
+			network.getLockupInfo('/financial/update.htm', lockup["id"], function(info) {
+				// debug data
+				var info = {
+					"financialId": 1,
+					"activityStatus": "抢购已结束",
+					"id": 1,
+					"interestEndTime": 1528819200000,
+					"interestStartTime": 1528891200000,
+					"minAmount": 100,
+					"nextPanicEndTime": 0,
+					"nextPanicStartTime": 0,
+					"panicEndTime": 1528789194000,
+					"panicStartTime": 1528767005000,
+					"panicTotalLimit": 10000,
+					"productName": "7天第一期",
+					"purchaseLimit": 1000,
+					"remainLimit": null,
+					"unlockTime": 1528902000000
+				}
+				lockup_list[lockup["id"]]["info"] = info;
+			});
 		})
 		var greeting_res = '欢迎进入持仓收益计划应用，本活动长期有效，';
 		var lockup_count = res.length;
@@ -79,8 +100,10 @@ eventBus.on('headless_wallet_ready', function(){
 	network.getLockupMenu('/financial/home.htm', function(menu, error, status_code) {
 		if (error) {
 			console.log(error)
+			return;
 		} else if (status_code) {
 			console.log('Status code: ' + status_code);
+			return;
 		}
 		menu.map(function(lockup){
 			var lockupId = lockup["id"];
@@ -137,12 +160,14 @@ eventBus.on('text', function(from_address, text){
 		var address = text.match(/\b[A-Z2-7]{32}\b/)[0];
 		var arrNumbers = text.split("#");
 		// get lockup amount
-		var amount = arrNumbers[1].match(/\d/)[0];
+		var amount = arrNumbers[1].match(/\d+/)[0];
 		// get lockup term
 		var lockupId = arrNumbers[2];
+		// if(amount<lockup_list[lockupId]["info"]['minAmount']) {
+		// 	return sendMessageToDevice(from_address, "输入金额不能少于"+lockup_list[lockupId]['info']['minAmount']);
+		// }
 		// get unlock date
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
-		// return;
 		return sendLockups.prePurchaseLockUp(from_address, address, amount, lockupId, unlock_date);
 	}
 
@@ -165,7 +190,7 @@ eventBus.on('text', function(from_address, text){
 		lockupDetail += ('活动状态: ' + info["activityStatus"] + '\n');
 		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? info["remainLimit"] : 0) + 'MN');
 		sendMessageToDevice(from_address, lockupDetail);
-		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额#合约ID”的格式发送给bot，bot在将会指导您接下来的购买操作');
+		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额MN#合约ID”的格式发送给bot，bot在将会指导您接下来的购买操作');
 		return;
 	
 	};
@@ -183,31 +208,24 @@ eventBus.on('text', function(from_address, text){
 });
 
 // validate commission and create lockup address
-eventBus.on('payment', function(from_address, unit){
+eventBus.on('received_payment', function(from_address,  amount, asset, message_counter, bToSharedAddress){
+	// sendMessageToDevice(from_address, 'title: '+ title + ' amount: ' + amount + ' asset: ' + asset);
+	if(asset!=='base' || amount<100000) {
+		return sendMessageToDevice(from_address, "手续费不足0.1MN或你所发送资产非TTT");
+	}
+	sendMessageToDevice(from_address, "收到手续费，正则生成合约");
 	// validate commission is sent to bot
-	db.query('select * from units join outputs using (unit) where unit=? and address=? and amount>=100000', [unit, botAddress], function(rows){
+	db.query('select * from lockups where from_address=? and sent=0', [from_address], function(rows){
 		if(rows.length===0){
-			return sendMessageToDevice(from_address, '未收到手续费或手续费未发给bot或者费用不足0.1MN');
+			return sendMessageToDevice(from_address, '未选取锁仓套餐')
 		}
-		// validate commission is unused
-		db.query('select * from used_commission where unit=?', [unit], function(rows){
-			if(rows.length!==0){
-				return sendMessageToDevice(from_address, '该手续费已被使用过');
-			}
-			db.query('insect into used_commission(unit) values(?)', [unit], function(){
-				sendMessageToDevice(from_address, '已收到手续费，正在生成合约地址，请稍候');
-				db.query('select * from lockups where from_address=? and sent=0', [from_address], function(rows){
-					if(rows.length===0){
-						return sendMessageToDevice(from_address, '未选取锁仓套餐')
-					}
-					var address = rows[0].address;
-					var amount = rows[0].amount;
-					var lockupId = rows[0].lockupId;
-					// create and store shared address, send result to user and server
-					sendLockups.purchaseLockup(from_address, address, amount, term);
-				});
-			});
-		});
+		var address = rows[0].address;
+		var amount = rows[0].amount;
+		var lockupId = rows[0].lockupId;
+		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
+		// return;
+		// create and store shared address, send result to user and server
+		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	});
 });
 

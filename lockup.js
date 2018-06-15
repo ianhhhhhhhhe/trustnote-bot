@@ -7,13 +7,7 @@ var network = require('./network.js');
 var configBot = require('./conf.js');
 var util = require('./util.js');
 
-var MINUTE = 60 * 1000;
-var HOUR = MINUTE * 60;
-var DAY = HOUR * 24
-var MONTH = DAY * 30;
-var YEAR = DAY * 365;
 var botAddress = 'B7ILVVZNBORPNS4ES6KH2C5HW3NTM55B';
-var url = '';
 
 function sendMessageToDevice(device_address, text){
 	var device = require('trustnote-common/device.js');
@@ -23,22 +17,25 @@ function sendMessageToDevice(device_address, text){
 function prePurchaseLockUp(from_address, address, amount, lockupId) {
 	db.query('select * from lockups where from_address=? and sent=0', [from_address], function(rows){
 		if(rows.length!==0){
-			sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓')
+			sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓');
+			sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
+			sendMessageToDevice(from_address, '[0.1MN](TTT:'+botAddress+'?amount=100000)');
 			return;
 		}
 		db.query('insert into lockups (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
 			sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
-			// sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
-			// sendMessageToDevice('[0.1MN](TTT:'+botAddress+'?amount=100000)');
+			sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
+			sendMessageToDevice(from_address, '[0.1MN](TTT:'+botAddress+'?amount=100000)');
 			return;
 		})
 	})
 	
 }
 
-function purchaseLockup(from_address, account_address, amount, locking_term, unlock_date){
+function purchaseLockup(from_address, account_address, amount, lockupId, unlock_date){
 	// create shared address and send it to user
 	// store the result and send it to server
+	sendMessageToDevice(from_address, 'address:'+account_address+'amount:'+amount+'lockupid:'+lockupId+'unlock_date:'+unlock_date);
 	if(!from_address || !account_address || !amount ||! unlock_date){
 		return sendMessageToDevice(from_address, 'Lack some important message');
 	}
@@ -46,13 +43,13 @@ function purchaseLockup(from_address, account_address, amount, locking_term, unl
 		if (err) {
 			return sendMessageToDevice(from_address, 'Something wrong happend:\n' + err);
 		}
-		db.query('update lockups set shared_address=?, sent=1 where from_address=? and term=?', [shared_address, from_address, term], function(){
+		db.query('update lockups set shared_address=?, sent=1 where from_address=? and lockupId=?', [shared_address, from_address, lockupId], function(){
 			// send result to server
-			network.postUserStatus(from_address, shared_address, lockupId, amount, function(){
+			// network.postUserStatus(from_address, shared_address, lockupId, amount, function(){
 				// send result to user
-				sendMessageToDevice(from_address, 'Your locking address is '+shared_address+'\nPlease transfer your money before '+util.timestampToDate(stopline)+' or you will not get any interest');
+				sendMessageToDevice(from_address, '你的合约地址为： '+shared_address+'\n请在活动结束前将资金打入合约内，否则你将不会受到任何利息');
 				sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
-			})
+			// })
 		});
 	});
 }

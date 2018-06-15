@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "request": "^2.87.0",
-    "trustnote-common": "git+https://github.com/trustnote/trustnote-common.git",
-    "trustnote-headless": "git+https://github.com/trustnote/trustnote-headless.git"
+    "trustnote-common": "git+https://github.com/trustnote/trustnote-common.git#bind",
+    "trustnote-headless": "git+https://github.com/trustnote/trustnote-headless.git#bind"
   }
 }
