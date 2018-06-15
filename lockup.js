@@ -7,7 +7,7 @@ var network = require('./network.js');
 var configBot = require('./conf.js');
 var util = require('./util.js');
 
-var botAddress = 'B7ILVVZNBORPNS4ES6KH2C5HW3NTM55B';
+var botAddress = configBot.botAddress;
 
 function sendMessageToDevice(device_address, text){
 	var device = require('trustnote-common/device.js');
@@ -15,16 +15,23 @@ function sendMessageToDevice(device_address, text){
 }
 
 function prePurchaseLockUp(from_address, address, amount, lockupId) {
-	db.query('select * from lockups where from_address=? and sent=0', [from_address], function(rows){
+	db.query('select * from lockups where from_address=? and lockupId=?', [from_address, lockupId], function(rows){
 		if(rows.length!==0){
-			sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓');
-			sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
-			sendMessageToDevice(from_address, '[0.1MN](TTT:'+botAddress+'?amount=100000)');
+			if(rows[0]["sent"]==0){
+				sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓');
+				sendMessageToDevice(from_address, '请转账0.1MN到：'+botAddress+'以完成kyc验证');
+				sendMessageToDevice(from_address, '[0.1MN](TTT:'+botAddress+'?amount=100000)');
+			}
+			if(rows[0]["sent"]==1){
+				// query database and check if client has put required amout into the address
+				sendMessageToDevice(from_address, '你已参加过该活动，请选择其他套餐或关注下期活动');
+				sendMessageToDevice(from_address, '你的合约地址为'+rows[0]["shared_address"]);
+			}
 			return;
 		}
 		db.query('insert into lockups (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
-			sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
-			sendMessageToDevice(from_address, '请用下方链接支付0.1MN手续费到'+botAddress+'地址以获取锁仓地址');
+			// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
+			sendMessageToDevice(from_address, '请转账0.1MN到：'+botAddress+'以完成kyc验证');
 			sendMessageToDevice(from_address, '[0.1MN](TTT:'+botAddress+'?amount=100000)');
 			return;
 		})
@@ -35,6 +42,7 @@ function prePurchaseLockUp(from_address, address, amount, lockupId) {
 function purchaseLockup(from_address, account_address, amount, lockupId, unlock_date){
 	// create shared address and send it to user
 	// store the result and send it to server
+	sendMessageToDevice(from_address, "认证通过，正在生成合约");
 	sendMessageToDevice(from_address, 'address:'+account_address+'amount:'+amount+'lockupid:'+lockupId+'unlock_date:'+unlock_date);
 	if(!from_address || !account_address || !amount ||! unlock_date){
 		return sendMessageToDevice(from_address, 'Lack some important message');

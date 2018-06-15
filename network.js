@@ -61,9 +61,7 @@ function getUserStatus(device_address, callback) {
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
             var res = {};
-            res["menu"] = result["entity"];
-            res["participants"] = result["participants"];
-            res["reset_limit"] = result["reset_limit"];
+            res["status"] = result["entity"];
             // console.log('Menu: ' + result);
 			callback(res);
 		} else {

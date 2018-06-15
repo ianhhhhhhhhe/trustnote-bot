@@ -15,7 +15,6 @@ const SESSION_TIMEOUT = 600*1000;
 const DEFAULT_GREETING = 'Hello, this is trustnote-bot. How may I help you?'
 var assocSessions = {};
 var lockup_list={};
-var botAddress = 'B7ILVVZNBORPNS4ES6KH2C5HW3NTM55B';
 
 function resumeSession(device_address){
 	if (!assocSessions[device_address])
@@ -49,12 +48,14 @@ function sendGreeting(device_address){
 		if(!res){
 			return sendMessageToDevice(device_address, '活动尚未开启，敬请期待')
 		}
+		// Inital lockup_list
+		lockup_list = {};
 		res.map(function(lockup){
 			lockup_list[lockup["id"]] = lockup;
 			network.getLockupInfo('/financial/update.htm', lockup["id"], function(info) {
 				// debug data
 				var info = {
-					"financialId": 1,
+					"financialId": lockup["id"],
 					"activityStatus": "抢购已结束",
 					"id": 1,
 					"interestEndTime": 1528819200000,
@@ -111,7 +112,7 @@ eventBus.on('headless_wallet_ready', function(){
 			network.getLockupInfo('/financial/update.htm', lockupId, function(info) {
 				// debug data
 				var info = {
-					"financialId": 1,
+					"financialId": lockupId,
 					"activityStatus": "抢购已结束",
 					"id": 1,
 					"interestEndTime": 1528819200000,
@@ -151,6 +152,7 @@ eventBus.on('text', function(from_address, text){
 	if (text.match(/hello/i))
 		return sendMessageToDevice(from_address, DEFAULT_GREETING);
 	
+	// get latest lockup menu
 	if (text.match(/greeting/i) || text.match(/理财套餐/i))
 	    return sendGreeting(from_address);
 
@@ -163,9 +165,17 @@ eventBus.on('text', function(from_address, text){
 		var amount = arrNumbers[1].match(/\d+/)[0];
 		// get lockup term
 		var lockupId = arrNumbers[2];
-		// if(amount<lockup_list[lockupId]["info"]['minAmount']) {
-		// 	return sendMessageToDevice(from_address, "输入金额不能少于"+lockup_list[lockupId]['info']['minAmount']);
-		// }
+		// check if lockup is available
+		if (!lockup_list[lockupId]){
+			return sendMessageToDevice(from_address, '未找到该活动，输入“理财套餐”查看正在进行的活动');
+		}
+		if(!lockup_list[lockupId]["info"]){
+			return sendMessageToDevice(from_address, "活动暂未开启，敬请期待")
+		}
+		// validate amont
+		if(amount<lockup_list[lockupId]["info"]['minAmount']) {
+			return sendMessageToDevice(from_address, "输入金额不能少于"+lockup_list[lockupId]['info']['minAmount']);
+		}
 		// get unlock date
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
 		return sendLockups.prePurchaseLockUp(from_address, address, amount, lockupId, unlock_date);
@@ -174,6 +184,9 @@ eventBus.on('text', function(from_address, text){
 	// return lockup detail
 	if (text.match(/#\d/)){
 		var lockupId = text.match(/\d/);
+		if (!lockup_list[lockupId]){
+			return sendMessageToDevice(from_address, '未找到该活动，输入“理财套餐”获取最新活动套餐');
+		}
 		var info = lockup_list[lockupId]["info"];
 		if(!info){
 			return sendMessageToDevice(from_address, '活动暂未开启，敬请期待');
@@ -190,7 +203,7 @@ eventBus.on('text', function(from_address, text){
 		lockupDetail += ('活动状态: ' + info["activityStatus"] + '\n');
 		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? info["remainLimit"] : 0) + 'MN');
 		sendMessageToDevice(from_address, lockupDetail);
-		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额MN#合约ID”的格式发送给bot，bot在将会指导您接下来的购买操作');
+		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额MN#合约ID”的格式发送给bot(购买金额必须为整数)，bot在将会指导您接下来的购买操作');
 		return;
 	
 	};
@@ -209,21 +222,19 @@ eventBus.on('text', function(from_address, text){
 
 // validate commission and create lockup address
 eventBus.on('received_payment', function(from_address,  amount, asset, message_counter, bToSharedAddress){
-	// sendMessageToDevice(from_address, 'title: '+ title + ' amount: ' + amount + ' asset: ' + asset);
+    // validate commission and create shared address
 	if(asset!=='base' || amount<100000) {
 		return sendMessageToDevice(from_address, "手续费不足0.1MN或你所发送资产非TTT");
 	}
-	sendMessageToDevice(from_address, "收到手续费，正则生成合约");
-	// validate commission is sent to bot
+	// 查找未完成的合约
 	db.query('select * from lockups where from_address=? and sent=0', [from_address], function(rows){
 		if(rows.length===0){
-			return sendMessageToDevice(from_address, '未选取锁仓套餐')
+			return sendMessageToDevice(from_address, '未选取锁仓套餐或没有需要交手续费的订单');
 		}
 		var address = rows[0].address;
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
-		// return;
 		// create and store shared address, send result to user and server
 		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	});

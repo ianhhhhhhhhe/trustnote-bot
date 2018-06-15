@@ -23,5 +23,6 @@ exports.KEYS_FILENAME = 'keys.json';
 
 exports.TIMESTAMPER_ADDRESS = 'UABSDF77S6SU4FDAXWTYIODVODCAA22A';
 exports.server_url = 'https://testactivity.trustnote.org';
+exports.botAddress = 'B7ILVVZNBORPNS4ES6KH2C5HW3NTM55B';
 
 console.log('finished faucet conf');
