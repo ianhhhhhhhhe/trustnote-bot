@@ -52,25 +52,7 @@ function sendGreeting(device_address){
 		lockup_list = {};
 		res.map(function(lockup){
 			lockup_list[lockup["id"]] = lockup;
-			network.getLockupInfo('/financial/update.htm', lockup["id"], function(info) {
-				// debug data
-				var info = {
-					"financialId": lockup["id"],
-					"activityStatus": "抢购已结束",
-					"id": 1,
-					"interestEndTime": 1528819200000,
-					"interestStartTime": 1528891200000,
-					"minAmount": 100,
-					"nextPanicEndTime": 0,
-					"nextPanicStartTime": 0,
-					"panicEndTime": 1528789194000,
-					"panicStartTime": 1528767005000,
-					"panicTotalLimit": 10000,
-					"productName": "7天第一期",
-					"purchaseLimit": 1000,
-					"remainLimit": null,
-					"unlockTime": 1528902000000
-				}
+			network.getLockupInfo('/financial-benefits/push.htm', lockup["id"], function(info) {
 				lockup_list[lockup["id"]]["info"] = info;
 			});
 		})
@@ -109,25 +91,7 @@ eventBus.on('headless_wallet_ready', function(){
 		menu.map(function(lockup){
 			var lockupId = lockup["id"];
 			lockup_list[lockupId] = lockup;
-			network.getLockupInfo('/financial/update.htm', lockupId, function(info) {
-				// debug data
-				var info = {
-					"financialId": lockupId,
-					"activityStatus": "抢购已结束",
-					"id": 1,
-					"interestEndTime": 1528819200000,
-					"interestStartTime": 1528891200000,
-					"minAmount": 100,
-					"nextPanicEndTime": 0,
-					"nextPanicStartTime": 0,
-					"panicEndTime": 1528789194000,
-					"panicStartTime": 1528767005000,
-					"panicTotalLimit": 10000,
-					"productName": "7天第一期",
-					"purchaseLimit": 1000,
-					"remainLimit": null,
-					"unlockTime": 1528902000000
-				}
+			network.getLockupInfo('/financial-benefits/push.htm', lockupId, function(info) {
 				lockup_list[lockupId]["info"] = info;
 			})
 		})
@@ -157,7 +121,7 @@ eventBus.on('text', function(from_address, text){
 	    return sendGreeting(from_address);
 
 	// pre-purchase lockup
-	if (text.match(/[A-Z2-7]{32}#\d+MN#\d+/)) {
+	if (text.match(/^[A-Z2-7]{32}#\d+MN#\d+$/)) {
 		// get user's address
 		var address = text.match(/\b[A-Z2-7]{32}\b/)[0];
 		var arrNumbers = text.split("#");
@@ -182,7 +146,7 @@ eventBus.on('text', function(from_address, text){
 	}
 
 	// return lockup detail
-	if (text.match(/#\d/)){
+	if (text.match(/^#\d$/)){
 		var lockupId = text.match(/\d/);
 		if (!lockup_list[lockupId]){
 			return sendMessageToDevice(from_address, '未找到该活动，输入“理财套餐”获取最新活动套餐');
@@ -212,12 +176,14 @@ eventBus.on('text', function(from_address, text){
 	// get users lockup status
 	// if sent === 0 means users didn't pay the commission
 	// if sent === 1 means the commission has been paid
-	if (text.match(/我的合约状态/)){
+	if (text.match(/^我的合约状态$/)){
 		// get users payment status from server
 		network.getUserStatus(from_address, function(){
 			return sendMessageToDevice(from_address, res);
 		});
 	}
+
+	sendMessageToDevice(from_address, '无法识别输入内容');
 });
 
 // validate commission and create lockup address
