@@ -146,7 +146,7 @@ eventBus.on('text', function(from_address, text){
 		if(Date.now() <= panicEndtime){
 			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
 		}
-		return sendLockups.prePurchaseLockUp(from_address, address, amount, lockupId, unlock_date);
+		return sendLockups.prePurchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	}
 
 	// return lockup detail
@@ -199,6 +199,13 @@ eventBus.on('text', function(from_address, text){
 			})
 			return;
 		});
+	}
+
+	// cancel my unfinished bill
+	if (text.match(/^取消未支付手续费的合约$/)){
+		db.query('delete from lockups where device_address=? and sent=0', [from_address], function(){
+			return sendMessageToDevice(from_address, '已经取消您未支付手续费的合约');
+		})
 	}
 
 	sendMessageToDevice(from_address, '您输入的信息无法识别，请尝试重新发起流程，输入“理财套餐”获取最新活动列表');
