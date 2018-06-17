@@ -14,7 +14,8 @@ function sendMessageToDevice(device_address, text){
 	device.sendMessageToDevice(device_address, 'text', text);
 }
 
-function prePurchaseLockUp(from_address, address, amount, lockupId) {
+function prePurchaseLockup(from_address, address, amount, lockupId) {
+	// check unfinished bill
 	db.query('select * from lockups where from_address=? and lockupId=?', [from_address, lockupId], function(rows){
 		if(rows.length!==0){
 			if(rows[0]["sent"]==0){
@@ -25,7 +26,13 @@ function prePurchaseLockUp(from_address, address, amount, lockupId) {
 			if(rows[0]["sent"]==1){
 				// query database and check if client has put required amout into the address
 				sendMessageToDevice(from_address, '你已参加过该活动，请选择其他套餐或关注下期活动');
-				sendMessageToDevice(from_address, '你的合约地址为'+rows[0]["shared_address"]);
+				network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
+					result.map(function(lockup){
+						if(lockup["sharedAddress"]===rows[0]["shared_address"]){
+							sendMessageToDevice(from_address, '你此次活动的合约地址为'+rows[0]["shared_address"]+'\n状态：'+lockup["lockupStatus"]);
+						}
+					})
+				});
 			}
 			return;
 		}
@@ -134,5 +141,5 @@ function onError(err){
 }
 
 exports.sendLockResponse = purchaseLockup;
-exports.prePurchaseLockUp = prePurchaseLockUp;
+exports.prePurchaseLockup = prePurchaseLockup;
 exports.purchaseLockup = purchaseLockup;
