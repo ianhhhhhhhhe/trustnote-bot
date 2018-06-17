@@ -50,9 +50,9 @@ function getLockupInfo(api, lockupID, callback){
 	});
 }
 
-function getUserStatus(device_address, callback) {
+function getUserStatus(api, device_address, callback) {
     request({
-        url: url + api,
+        url: url + api + "?deviceAddress=" + device_address,
         method: 'GET',
         headers:{
             Referer: 'localhost',
@@ -60,10 +60,8 @@ function getUserStatus(device_address, callback) {
         }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
-            var res = {};
-            res["status"] = result["entity"];
             // console.log('Menu: ' + result);
-			callback(res);
+			callback(result['entity']);
 		} else {
             if (error){
                 callback('', error);
