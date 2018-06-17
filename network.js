@@ -7,6 +7,22 @@ var conf = require('./conf.js');
 var url = conf.server_url;
 
 function getLockupMenu(api, callback){
+    /*
+    body:
+    {
+        "code"
+        "entity":
+        [ { financialName:,
+            financialRate:,
+            id,
+            numericalv,
+            uptTime
+        } ],
+        "hasMore",
+        "msg",
+        "totalCount"
+    }
+    */
 	request({
         url: url + api,
         method: 'GET',
@@ -29,6 +45,27 @@ function getLockupMenu(api, callback){
 }
 
 function getLockupInfo(api, lockupID, callback){
+    /*
+    body:
+    {
+        "code"
+        "entity":
+        [ { minAmount,
+            nextPanicEndTime,
+            nextPanicStartTime,
+            panicEndTime,
+            panicStartTime,
+            panicTotalLimit,
+            productName,
+            purchaseLimit,
+            remainLimit,
+            unlockTime
+        } ],
+        "hasMore",
+        "msg",
+        "totalCount"
+    }
+    */
     request({
         url: url + api + '?financialId=' + lockupID,
         method: 'GET',
@@ -51,6 +88,27 @@ function getLockupInfo(api, lockupID, callback){
 }
 
 function getUserStatus(api, device_address, callback) {
+    /*
+    body:
+    {
+        "code"
+        "entity":
+        [ { deviceAddress,
+            financialBenefitsId,
+            id,
+            incomeAmount,
+            lockUpAmount,
+            lockUpStatus,
+            operationTime,
+            orderAmount,
+            sharedAddress,
+            tempAmount
+        } ],
+        "hasMore",
+        "msg",
+        "totalCount"
+    }
+    */
     request({
         url: url + api + "?deviceAddress=" + device_address,
         method: 'GET',
