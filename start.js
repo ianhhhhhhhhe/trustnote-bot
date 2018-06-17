@@ -142,7 +142,8 @@ eventBus.on('text', function(from_address, text){
 		}
 		// get unlock date
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
-		if(Date.now() <= unlock_date){
+		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
+		if(Date.now() <= panicEndtime){
 			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
 		}
 		return sendLockups.prePurchaseLockUp(from_address, address, amount, lockupId, unlock_date);
@@ -218,7 +219,8 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
-		if(Date.now() <= unlock_date){
+		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
+		if(Date.now() <= panicEndtime){
 			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
 		}
 		// create and store shared address, send result to user and server
