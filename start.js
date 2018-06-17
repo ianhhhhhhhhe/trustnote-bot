@@ -59,15 +59,14 @@ function sendGreeting(device_address){
 		var greeting_res = '欢迎进入持仓收益计划应用，本活动长期有效，';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
-		greeting_res += '当前共有50人参与，已持仓550,000MN，欢迎选择套餐参与\n';
+		greeting_res += '当前共有50人参与，已持仓550,000MN，欢迎选择套餐参与\n\n';
 		res.map(function(lockup) {
-			greeting_res+=lockup.financialName;
-			greeting_res+=(lockup.financialRate*100 + '%');
-			greeting_res+=' (id:#';
+			greeting_res+='['+lockup.financialName+']';
+			greeting_res+='(command:#';
 			greeting_res+=lockup.id;
 			greeting_res+=')\n';
 		})
-		greeting_res+='输入套餐id查询套餐状态';
+		greeting_res+='\n输入套餐id查询套餐状态';
 		sendMessageToDevice(device_address, greeting_res);
 		// sendMessageToDevice(device_address, DEFAULT_GREETING);
 		assocSessions[device_address].greeting_ts = Date.now();
@@ -115,6 +114,9 @@ eventBus.on('text', function(from_address, text){
 	// for debug, to test client's and bot's connection status
 	if (text.match(/hello/i))
 		return sendMessageToDevice(from_address, DEFAULT_GREETING);
+
+	if (text.match(/command/i))
+	    return sendMessageToDevice(from_address, 'something:\n[orders](command:orders)');
 	
 	// get latest lockup menu
 	if (text.match(/greeting/i) || text.match(/理财套餐/i))
