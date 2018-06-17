@@ -142,6 +142,9 @@ eventBus.on('text', function(from_address, text){
 		}
 		// get unlock date
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
+		if(Date.now() <= unlock_date){
+			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+		}
 		return sendLockups.prePurchaseLockUp(from_address, address, amount, lockupId, unlock_date);
 	}
 
@@ -155,17 +158,23 @@ eventBus.on('text', function(from_address, text){
 		if(!info){
 			return sendMessageToDevice(from_address, '活动暂未开启，敬请期待');
 		}
-		var lockupDetail = ('合约ID: ' + info["financialId"] + '\n');
-		lockupDetail += ('最低购买额度: ' + info["minAmount"] + 'MN\n');
+		var lockupDetail = ('产品名称' + lockup_list[lockupId]["financialName"] +'\n');
+		lockupDetail += ('合约ID: ' + info["financialId"] + '\n');
+		
+		lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
+		lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
+		lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
+		lockupDetail += ('\n抢购总额度: ' + info["panicTotalLimit"] + 'MN\n');
+		lockupDetail += ('起购额度: ' + info["minAmount"] + 'MN\n');
 		if(info["maxAmount"]){
-			lockupDetail += ('最高购买额度: ' + info["maxAmount"] + '\n');
+			lockupDetail += ('限购额度: ' + info["maxAmount"] + 'MN\n');
 		}
-		lockupDetail += ('活动开始时间: ' + util.timestampToDate(info["panicStartTime"]) + '\n');
-		lockupDetail += ('活动结束时间: ' + util.timestampToDate(info["panicEndTime"]) + '\n');
-		lockupDetail += ('计息开始时间: ' + util.timestampToDate(info["interestStartTime"]) + '\n');
-		lockupDetail += ('计息结束时间: ' + util.timestampToDate(info["interestEndTime"]) + '\n');
-		lockupDetail += ('活动状态: ' + info["activityStatus"] + '\n');
-		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? info["remainLimit"] : 0) + 'MN');
+		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? info["remainLimit"] : 0) + 'MN\n');
+		lockupDetail += ('\n状态: ' + info["activityStatus"] + '\n');
+		if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
+			lockupDetail += '\n下期抢购时间'
+			lockupDetail += (util.timestampToDate(info["nextPanicStartTime"]) + ' - ' + util.timestampToDate(info["nextPanicEndTime"]));
+		}
 		sendMessageToDevice(from_address, lockupDetail);
 		sendMessageToDevice(from_address, '若要购买合约，请按照“您的地址#购买金额MN#合约ID”的格式发送给bot(购买金额必须为整数)，bot在将会指导您接下来的购买操作');
 		return;
@@ -178,12 +187,20 @@ eventBus.on('text', function(from_address, text){
 	// if sent === 1 means the commission has been paid
 	if (text.match(/^我的合约状态$/)){
 		// get users payment status from server
-		network.getUserStatus(from_address, function(){
-			return sendMessageToDevice(from_address, res);
+		network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
+			result.map(function(lockup){
+				var res = '';
+				res += ('合约地址：' + lockup["sharedAddress"] + '\n');
+				res += ('合约状态：' + lockup["lockupStatus"] + '\n');
+				res += ('更新时间：' + lockup["operationTime"] + '\n');
+				res += ('合约ID：' + lockup["financialBenefitsId"] + '\n');
+				sendMessageToDevice(from_address, res);
+			})
+			return;
 		});
 	}
 
-	sendMessageToDevice(from_address, '无法识别输入内容');
+	sendMessageToDevice(from_address, '您输入的信息无法识别，请尝试重新发起流程，输入“理财套餐”获取最新活动列表');
 });
 
 // validate commission and create lockup address
@@ -201,6 +218,9 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
+		if(Date.now() <= unlock_date){
+			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+		}
 		// create and store shared address, send result to user and server
 		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	});
