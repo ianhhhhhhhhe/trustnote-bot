@@ -39,3 +39,7 @@ Session.vim
 # Test Files
 
 test*
+
+# vs code debug folder
+
+.vscode
