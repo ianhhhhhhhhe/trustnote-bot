@@ -130,13 +130,22 @@ function getUserStatus(api, device_address, callback) {
 	});
 }
 
-function postUserStatus(from_address, shared_address, lockupId, amount, callback) {
+
+function postUserStatus(api, from_address, shared_address, lockupId, amount, callback) {
+    var json = {
+        "sharedAddress": shared_address,
+        "deviceAddress": from_address,
+        "financialBenefitsId": lockupId,
+        "orderAmount": amount
+    }
     request({
         url: url + api,
         method: 'POST',
         headers:{
-            Referer: 'localhost',
-            Origin: 'http://localhost:8080'}
+            "Content-Type": "application/json;charset=UTF-8",
+            "Referer": 'localhost',
+            "Origin": 'http://localhost:8080'},
+        body: JSON.stringify(json)
         }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);

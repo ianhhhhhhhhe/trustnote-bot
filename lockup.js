@@ -60,11 +60,11 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 		}
 		db.query('update lockups set shared_address=?, sent=1 where from_address=? and lockupId=?', [shared_address, from_address, lockupId], function(){
 			// send result to server
-			// network.postUserStatus(from_address, shared_address, lockupId, amount, function(){
+			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, lockupId, amount, function(){
 				// send result to user
 				sendMessageToDevice(from_address, '你的合约地址为： '+shared_address+'\n请在活动结束前将资金打入合约内，否则你将不会受到任何利息');
 				sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
-			// })
+			});
 		});
 	});
 }

@@ -247,7 +247,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		if(Date.now() <= panicEndtime){
 			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
 		}
-		create and store shared address, send result to user and server
+		// create and store shared address, send result to user and server
 		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	});
 });
