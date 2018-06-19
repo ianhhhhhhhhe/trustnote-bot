@@ -16,7 +16,7 @@ function sendMessageToDevice(device_address, text){
 
 function prePurchaseLockup(from_address, address, amount, lockupId) {
 	// check unfinished bill
-	db.query('select * from lockups where from_address=? and lockupId=?', [from_address, lockupId], function(rows){
+	db.query('select * from user_status where from_address=? and lockupId=?', [from_address, lockupId], function(rows){
 		if(rows.length!==0){
 			if(rows[0]["sent"]==0){
 				sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓');
@@ -36,7 +36,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 			}
 			return;
 		}
-		db.query('insert into lockups (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
+		db.query('insert into user_status (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
 			// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 			sendMessageToDevice(from_address, '请转账0.1MN到：'+botAddress+'以完成kyc验证');
 			sendMessageToDevice(from_address, '[0.1MN](TTT:'+botAddress+'?amount=100000)');
@@ -50,7 +50,8 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 	// create shared address and send it to user
 	// store the result and send it to server
 	sendMessageToDevice(from_address, "认证通过，正在生成合约");
-	sendMessageToDevice(from_address, 'address:'+account_address+'amount:'+amount+'lockupid:'+lockupId+'unlock_date:'+unlock_date);
+	// debug information
+	sendMessageToDevice(from_address, 'address:'+account_address+'\namount:'+amount+'\nlockupid:'+lockupId+'\nunlock_date:'+unlock_date);
 	if(!from_address || !account_address || !amount ||! unlock_date){
 		return sendMessageToDevice(from_address, 'Lack some important message');
 	}
@@ -58,7 +59,7 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 		if (err) {
 			return sendMessageToDevice(from_address, 'Something wrong happend:\n' + err);
 		}
-		db.query('update lockups set shared_address=?, sent=1 where from_address=? and lockupId=?', [shared_address, from_address, lockupId], function(){
+		db.query('update user_status set shared_address=?, sent=1 where from_address=? and lockupId=?', [shared_address, from_address, lockupId], function(){
 			// send result to server
 			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, lockupId, amount, function(){
 				// send result to user

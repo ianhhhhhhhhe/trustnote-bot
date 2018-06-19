@@ -1,5 +1,5 @@
-CREATE TABLE lockups (
-	from_address CHAR(33) NOT NULL,
+CREATE TABLE user_status (
+	from_address CHAR(33) NOT NULL PRIMARY KEY,
 	address CHAR(32) NOT NULL,
 	amount INTEGER NOT NULL,
 	lockupId INTEGER NOT NULL,
@@ -7,7 +7,22 @@ CREATE TABLE lockups (
 	sent INTEGER NULL
 );
 
-CREATE TABLE used_commission (
-	units_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	unit CHAR(44) NOT NULL
+CREATE TABLE lockups (
+	financialBenefitsId INTEGER NOT NULL PRIMARY KEY,
+	activityStatus CHAR(32) NOT NULL,
+	financialId INTEGER NOT NULL,
+	financialRate INTEGER NOT NULL,
+	financialStatus INTEGER NOT NULL,
+	interestEndTime INTEGER NOT NULL,
+	interestStartTime INTEGER NOT NULL,
+	minAmount INTEGER NOT NULL,
+	nextPanicEndTime INTEGER NOT NULL,
+	nextPanicStartTime INTEGER NOT NULL,
+	panicEndTime INTEGER NOT NULL,
+	panicStartTime INTEGER NOT NULL,
+	panicTotalLimit INTEGER NOT NULL,
+	productName CHAR(32) NOT NULL,
+	purchaseLimit INTEGER NOT NULL,
+	remainLimit INTEGER NOT NULL,
+	unlockTime INTEGER NOT NULL
 );

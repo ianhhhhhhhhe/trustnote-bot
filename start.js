@@ -38,6 +38,43 @@ function sendMessageToDevice(device_address, text){
 //	assocSessions[device_address].ts = Date.now();
 }
 
+function updateLockupMenu(res){
+	// Inital lockup_list
+	lockup_list = {};
+	res.map(function(lockup){
+		var financialBenefitsId = lockup["financialBenefitsId"];
+		lockup_list[lockup["financialBenefitsId"]] = lockup;
+		db.query('select * from lockups where financialBenefitsId=?', [financialBenefitsId], function(rows){
+			if(rows.length===0){
+				network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockup["financialBenefitsId"], function(info) {
+					db.query('insert into lockups (financialBenefitsId, activityStatus, financialId, \n\
+						financialRate, financialStatus, interestEndTime, \n\
+						interestStartTime, minAmount, nextPanicEndTime, \n\
+						nextPanicStartTime, panicEndTime, panicStartTime, \n\
+						panicTotalLimit, productName, purchaseLimit, \n\
+						remainLimit, unlockTime) \n\
+						values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', 
+						[info["id"], info["activityStatus"],info["financialId"], 
+						info["financialRate"], info["financialStatus"], info["interestEndTime"],
+						info["interestStartTime"], info["minAmount"], info["nextPanicEndTime"],
+						info["nextPanicStartTime"], info["panicEndTime"], info["panicStartTime"], 
+						info["panicTotalLimit"], info["productName"], info["purchaseLimit"], 
+						info["remainLimit"], info["unlockTime"]], function(){
+						lockup_list[lockup["financialBenefitsId"]]["info"] = info;
+					});
+				});
+			}
+			else {
+				lockup_list[lockup["financialBenefitsId"]]["info"] = rows[0];
+			}
+		})
+		// lockup_list[lockup["id"]] = lockup;
+		// network.getLockupInfo('/financial-benefits/push.htm', lockup["id"], function(info) {
+		// 	lockup_list[lockup["id"]]["info"] = info;
+		// });
+	})
+}
+
 function sendGreeting(device_address){
 	// get lockup service information
 	network.getLockupMenu('/financial/home.htm', function(res, error, status_code) {
@@ -49,14 +86,7 @@ function sendGreeting(device_address){
 		if(!res){
 			return sendMessageToDevice(device_address, '活动尚未开启，敬请期待')
 		}
-		// Inital lockup_list
-		lockup_list = {};
-		res.map(function(lockup){
-			lockup_list[lockup["id"]] = lockup;
-			network.getLockupInfo('/financial-benefits/push.htm', lockup["id"], function(info) {
-				lockup_list[lockup["id"]]["info"] = info;
-			});
-		})
+		updateLockupMenu(res);
 		var greeting_res = '欢迎进入持仓收益计划应用，本活动长期有效，';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
@@ -64,7 +94,7 @@ function sendGreeting(device_address){
 		res.map(function(lockup) {
 			greeting_res+='['+lockup.financialName+']';
 			greeting_res+='(command:#';
-			greeting_res+=lockup.id;
+			greeting_res+=lockup["financialBenefitsId"];
 			greeting_res+=')\n';
 		})
 		greeting_res+='\n输入套餐id查询套餐状态';
@@ -88,13 +118,7 @@ eventBus.on('headless_wallet_ready', function(){
 			console.log('Status code: ' + status_code);
 			return;
 		}
-		menu.map(function(lockup){
-			var lockupId = lockup["id"];
-			lockup_list[lockupId] = lockup;
-			network.getLockupInfo('/financial-benefits/push.htm', lockupId, function(info) {
-				lockup_list[lockupId]["info"] = info;
-			})
-		})
+		updateLockupMenu(menu);
 	});
 });
 
@@ -138,15 +162,15 @@ eventBus.on('text', function(from_address, text){
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
 		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
 		// validate activity date
-		if(Date.now() <= panicEndtime){
-			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
-		}
+		// if(Date.now() <= panicEndtime){
+		// 	return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+		// }
 		users_status[from_address] = {
 			"address": address,
 			"lockupId": lockupId,
 			"unlock_date": unlock_date
 		}
-		return sendMessageToDevice(from_address, '请输入购买额度');
+		return sendMessageToDevice(from_address, '请输入购买额度（例如：100000MN）');
 		// return sendLockups.prePurchaseLockup(from_address, address, amount, lockupId);
 	}
 
@@ -219,7 +243,7 @@ eventBus.on('text', function(from_address, text){
 
 	// cancel my unfinished bill
 	if (text.match(/^取消未支付手续费的合约$/)){
-		db.query('delete from lockups where device_address=? and sent=0', [from_address], function(){
+		db.query('delete from user_status where device_address=? and sent=0', [from_address], function(){
 			return sendMessageToDevice(from_address, '已经取消您未支付手续费的合约');
 		})
 	}
@@ -234,7 +258,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		return sendMessageToDevice(from_address, "手续费不足0.1MN或你所发送资产非TTT");
 	}
 	// 查找未完成的合约
-	db.query('select * from lockups where from_address=? and sent=0', [from_address], function(rows){
+	db.query('select * from user_status where from_address=? and sent=0', [from_address], function(rows){
 		if(rows.length===0){
 			return sendMessageToDevice(from_address, '未选取锁仓套餐或没有需要交手续费的订单');
 		}
@@ -244,9 +268,9 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
 		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
 		// validate activity date
-		if(Date.now() <= panicEndtime){
-			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
-		}
+		// if(Date.now() <= panicEndtime){
+		// 	return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+		// }
 		// create and store shared address, send result to user and server
 		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	});

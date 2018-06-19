@@ -67,7 +67,7 @@ function getLockupInfo(api, lockupID, callback){
     }
     */
     request({
-        url: url + api + '?financialId=' + lockupID,
+        url: url + api + '?financialBenefitsId=' + lockupID,
         method: 'GET',
         headers:{
             Referer: 'localhost',
