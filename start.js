@@ -115,12 +115,6 @@ eventBus.on('text', function(from_address, text){
 	// for debug, to test client's and bot's connection status
 	if (text.match(/hello/i))
 		return sendMessageToDevice(from_address, DEFAULT_GREETING);
-
-	if (text.match(/^command$/i))
-		return sendMessageToDevice(from_address, 'something:\n[orders](command:orders)');
-	
-	if (text.match(/^botcommand$/i))
-		return sendMessageToDevice(from_address, 'something:\n[orders](command:orders)#');
 	
 	// get latest lockup menu
 	if (text.match(/greeting/i) || text.match(/理财套餐/i))
@@ -143,9 +137,10 @@ eventBus.on('text', function(from_address, text){
 		// get unlock date
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
 		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
-		// if(Date.now() <= panicEndtime){
-		// 	return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
-		// }
+		// validate activity date
+		if(Date.now() <= panicEndtime){
+			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+		}
 		users_status[from_address] = {
 			"address": address,
 			"lockupId": lockupId,
@@ -248,10 +243,11 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var lockupId = rows[0].lockupId;
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
 		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
-		// if(Date.now() <= panicEndtime){
-		// 	return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
-		// }
-		// create and store shared address, send result to user and server
+		// validate activity date
+		if(Date.now() <= panicEndtime){
+			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+		}
+		create and store shared address, send result to user and server
 		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	});
 });
