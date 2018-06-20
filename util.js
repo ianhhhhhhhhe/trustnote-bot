@@ -2,9 +2,9 @@
 "use strict";
 
 function timestampToDate(timestamp) {
-	var datetime = timestamp ? new Date(timestamp) : new Date(Date.now() + Math.round(DAY));
+	var datetime = new Date(timestamp);
 	var year = datetime.getFullYear();
-	var month = datetime.getMonth();
+	var month = datetime.getMonth() + 1;
 	var date = datetime.getDate();
 	var hours = datetime.getHours();
 	var minutes = datetime.getMinutes();
