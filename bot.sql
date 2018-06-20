@@ -1,10 +1,11 @@
 CREATE TABLE user_status (
-	from_address CHAR(33) NOT NULL PRIMARY KEY,
+	from_address CHAR(33) NOT NULL,
 	address CHAR(32) NOT NULL,
 	amount INTEGER NOT NULL,
 	lockupId INTEGER NOT NULL,
 	shared_address CHAR(32) NULL,
-	sent INTEGER NULL
+	sent INTEGER NULL,
+	PRIMARY KEY(from_address, lockupId)
 );
 
 CREATE TABLE lockups (
@@ -16,13 +17,13 @@ CREATE TABLE lockups (
 	interestEndTime INTEGER NOT NULL,
 	interestStartTime INTEGER NOT NULL,
 	minAmount INTEGER NOT NULL,
-	nextPanicEndTime INTEGER NOT NULL,
-	nextPanicStartTime INTEGER NOT NULL,
+	nextPanicEndTime INTEGER NULL,
+	nextPanicStartTime INTEGER NULL,
 	panicEndTime INTEGER NOT NULL,
 	panicStartTime INTEGER NOT NULL,
 	panicTotalLimit INTEGER NOT NULL,
-	productName CHAR(32) NOT NULL,
-	purchaseLimit INTEGER NOT NULL,
-	remainLimit INTEGER NOT NULL,
+	productName CHAR(32) NULL,
+	purchaseLimit INTEGER NULL,
+	remainLimit INTEGER NULL,
 	unlockTime INTEGER NOT NULL
 );
