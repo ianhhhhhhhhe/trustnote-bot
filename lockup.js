@@ -49,9 +49,9 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 function purchaseLockup(from_address, account_address, amount, lockupId, unlock_date){
 	// create shared address and send it to user
 	// store the result and send it to server
-	sendMessageToDevice(from_address, "认证通过，正在生成合约");
+	// sendMessageToDevice(from_address, "认证通过，正在生成合约");
 	// debug information
-	sendMessageToDevice(from_address, 'address:'+account_address+'\namount:'+amount+'\nlockupid:'+lockupId+'\nunlock_date:'+unlock_date);
+	// sendMessageToDevice(from_address, 'address:'+account_address+'\namount:'+amount+'\nlockupid:'+lockupId+'\nunlock_date:'+unlock_date);
 	if(!from_address || !account_address || !amount ||! unlock_date){
 		return sendMessageToDevice(from_address, 'Lack some important message');
 	}
@@ -63,8 +63,9 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 			// send result to server
 			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, lockupId, amount, function(){
 				// send result to user
-				sendMessageToDevice(from_address, '你的合约地址为： '+shared_address+'\n请在活动结束前将资金打入合约内，否则你将不会受到任何利息');
-				sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
+				// sendMessageToDevice(from_address, '你的合约地址为： '+shared_address+'\n请在活动结束前将资金打入合约内，否则你将不会受到任何利息');
+				// sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
+				sendMessageToDevice(from_address, '认证通过\n请30分钟内转账'+amount+'MN到智能合约地址:'+shared_address+'\n\n转多或转少不计入收益，本次解锁后的收益为 MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延')
 			});
 		});
 	});

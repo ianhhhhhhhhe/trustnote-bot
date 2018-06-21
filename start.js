@@ -90,7 +90,7 @@ function sendGreeting(device_address){
 		var greeting_res = '欢迎进入持仓收益计划应用，本活动长期有效，';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
-		greeting_res += '当前共有50人参与，已持仓550,000MN，欢迎选择套餐参与\n\n';
+		// greeting_res += '当前共有50人参与，已持仓550,000MN，欢迎选择套餐参与\n\n';
 		res.map(function(lockup) {
 			greeting_res+='['+lockup["financialName"]+lockup["financialRate"]*100+'%]';
 			greeting_res+='(command:#';
@@ -152,21 +152,21 @@ eventBus.on('text', function(from_address, text){
 		var lockupId = arrNumbers[1];
 		// check if lockup is available
 		if (!lockup_list[lockupId]){
-			return sendMessageToDevice(from_address, '未找到该活动，输入“理财套餐”查看正在进行的活动');
+			return sendMessageToDevice(from_address, '未找到该活动，请参与[其他套餐](command:理财套餐)');
 		}
 		if(!lockup_list[lockupId]["info"]){
 			return sendMessageToDevice(from_address, "活动暂未开启，敬请期待")
 		}
 		// get unlock date
 		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
-		var panicStarttime = lockup_list[lockupId]["info"]["panicEndTime"]
+		var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"]
 		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
 		// validate activity date
-		if(Date.now() >= panicStarttime){
+		if(Date.now() <= panicStarttime){
 			return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
 		}
 		if(Date.now() >= panicEndtime){
-			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+			return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
 		}
 		users_status[from_address] = {
 			"address": address,
@@ -203,13 +203,13 @@ eventBus.on('text', function(from_address, text){
 	if (text.match(/^#\d+$/)){
 		var lockupId = text.match(/\d+/);
 		if (!lockup_list[lockupId]){
-			return sendMessageToDevice(from_address, '未找到该活动，输入“理财套餐”获取最新活动套餐');
+			return sendMessageToDevice(from_address, '未找到该活动，请参与[其他套餐](command:理财套餐)');
 		}
 		var info = lockup_list[lockupId]["info"];
 		if(!info){
 			return sendMessageToDevice(from_address, '活动暂未开启，敬请期待');
 		}
-		var lockupDetail = ('产品名称' + lockup_list[lockupId]["financialName"] +'\n');
+		var lockupDetail = ('产品名称: ' + lockup_list[lockupId]["financialName"] +'\n\n');
 		lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
 		lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
 		lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
@@ -217,6 +217,8 @@ eventBus.on('text', function(from_address, text){
 		lockupDetail += ('起购额度: ' + info["minAmount"] + 'MN\n');
 		if(info["maxAmount"]){
 			lockupDetail += ('限购额度: ' + info["maxAmount"] + 'MN\n');
+		} else {
+			lockupDetail += '限购额度: 无上限\n'
 		}
 		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? info["remainLimit"] : 0) + 'MN\n');
 		lockupDetail += ('\n状态: <a style="color:red">' + info["activityStatus"] + '</a>\n');
@@ -259,7 +261,7 @@ eventBus.on('text', function(from_address, text){
 		})
 	}
 
-	sendMessageToDevice(from_address, '您输入的信息无法识别，请尝试重新发起流程\n输入“理财套餐”获取最新活动列表');
+	sendMessageToDevice(from_address, '您输入的信息无法识别，请尝试[重新发起流程](command:理财套餐)\n');
 });
 
 // validate commission and create lockup address
@@ -277,14 +279,14 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
 		var unlock_date = lockup_list[lockupId]["info"]["unlockTime"];
-		var panicStarttime = lockup_list[lockupId]["info"]["panicEndTime"]
-		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
+		var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"];
+		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
 		// validate activity date
-		if(Date.now() >= panicStarttime){
+		if(Date.now() <= panicStarttime){
 			return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
 		}
 		if(Date.now() >= panicEndtime){
-			return sendMessageToDevice(from_address, "该活动已结束，请参与其他套餐，输入“理财套餐”查询最新活动列表");
+			return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
 		}
 		// create and store shared address, send result to user and server
 		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
