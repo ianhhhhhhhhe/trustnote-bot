@@ -87,20 +87,24 @@ function sendGreeting(device_address){
 			return sendMessageToDevice(device_address, '该活动未开启，敬请期待')
 		}
 		updateLockupMenu(res);
-		var greeting_res = '欢迎进入持仓收益计划应用，本活动长期有效，';
+		var greeting_res = '欢迎进入持仓收益计划服务号，本活动长期有效，';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
-		// greeting_res += '当前共有50人参与，已持仓550,000MN，欢迎选择套餐参与\n\n';
-		res.map(function(lockup) {
-			greeting_res+='['+lockup["financialName"]+lockup["financialRate"]*100+'%]';
-			greeting_res+='(command:#';
-			greeting_res+=lockup["financialBenefitsId"];
-			greeting_res+=')\n';
+		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
+			var total_users = res2["total_user"];
+			var total_amount = res2["total_amount"];
+			greeting_res += '当前共有 _'+ util.formatNumbers(total_users)+'人_ 参与，已持仓 _'+util.formatNumbers(total_amount)+'MN_ ，欢迎选择套餐参与\n\n';
+			res.map(function(lockup) {
+				greeting_res+='['+lockup["financialName"]+lockup["financialRate"]*100+'%]';
+				greeting_res+='(command:#';
+				greeting_res+=lockup["financialBenefitsId"];
+				greeting_res+=')\n';
+			})
+			// greeting_res+='\n输入套餐id查询套餐状态';
+			sendMessageToDevice(device_address, greeting_res);
+			// sendMessageToDevice(device_address, DEFAULT_GREETING);
+			assocSessions[device_address].greeting_ts = Date.now();
 		})
-		greeting_res+='\n输入套餐id查询套餐状态';
-		sendMessageToDevice(device_address, greeting_res);
-		// sendMessageToDevice(device_address, DEFAULT_GREETING);
-		assocSessions[device_address].greeting_ts = Date.now();
 	});
 }
 
@@ -180,7 +184,7 @@ eventBus.on('text', function(from_address, text){
 			var myMinAmount = lockup_list[myLockupId]["info"]["minAmount"];
 			return sendLockups.prePurchaseLockup(from_address, myAddress, myMinAmount, myLockupId);
 		}
-		return sendMessageToDevice(from_address, '请输入购买额度（例如：100000MN）');
+		return sendMessageToDevice(from_address, '请输入抢购数量（例如：25000MN）');
 		// return sendLockups.prePurchaseLockup(from_address, address, amount, lockupId);
 	}
 
@@ -209,27 +213,40 @@ eventBus.on('text', function(from_address, text){
 		if(!info){
 			return sendMessageToDevice(from_address, '活动暂未开启，敬请期待');
 		}
-		var lockupDetail = ('产品名称: ' + lockup_list[lockupId]["financialName"] +'\n\n');
+		var lockupDetail = ('产品名称: ' + info["productName"] +'\n\n');
 		lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
 		lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
 		lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
-		lockupDetail += ('\n抢购总额度: ' + info["panicTotalLimit"] + 'MN\n');
-		lockupDetail += ('起购额度: ' + info["minAmount"] + 'MN\n');
+		lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
+		lockupDetail += ('起购额度: ' + util.formatNumbers(info["minAmount"]) + 'MN\n');
 		if(info["maxAmount"]){
-			lockupDetail += ('限购额度: ' + info["maxAmount"] + 'MN\n');
+			lockupDetail += ('限购额度: ' + util.formatNumbers(info["maxAmount"]) + 'MN\n');
 		} else {
 			lockupDetail += '限购额度: 无上限\n'
 		}
-		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? info["remainLimit"] : 0) + 'MN\n');
-		lockupDetail += ('\n状态: <a style="color:red">' + info["activityStatus"] + '</a>\n');
+		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
+		switch(info["activityStatus"]){
+			case "进行中":
+			case "抢购进行中":
+				lockupDetail += ('\n状态: _' + info["activityStatus"] + '_ \n'); // _blue_ -blue- +red+
+				break;
+			case "已结束":
+			case "抢购已结束":
+				lockupDetail += ('\n状态: +' + info["activityStatus"] + '+ \n'); // _blue_ -blue- +red+
+				break;
+			default:
+				lockupDetail += ('\n状态: ' + info["activityStatus"] + ' \n'); // _blue_ -blue- +red+
+				break;
+		}
 		if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
 			lockupDetail += '\n下期抢购时间: '
 			lockupDetail += (util.timestampToDate(info["nextPanicStartTime"]) + ' - ' + util.timestampToDate(info["nextPanicEndTime"]));
+		} else {
+			lockupDetail += '\n下期抢购时间: 敬请期待'
 		}
 		sendMessageToDevice(from_address, lockupDetail);
-		sendMessageToDevice(from_address, '点击[#'+ lockupId +'](command:#' + lockupId +')#购买此合约');
+		sendMessageToDevice(from_address, '请点击[#'+ lockupId +'](command:#' + lockupId +')#开始抢购');
 		return;
-	
 	};
 
 
@@ -249,19 +266,21 @@ eventBus.on('text', function(from_address, text){
 				}
 				res += ('更新时间：' + lockup["operationTime"] + '\n');
 				res += ('合约ID：' + lockup["financialBenefitsId"] + '\n');
-				return sendMessageToDevice(from_address, res);
+				sendMessageToDevice(from_address, res);
 			})
 		});
+		return;
 	}
 
 	// cancel my unfinished bill
 	if (text.match(/^取消未支付手续费的合约$/)){
 		db.query('delete from user_status where device_address=? and sent=0', [from_address], function(){
-			return sendMessageToDevice(from_address, '已经取消您未支付手续费的合约');
-		})
+			sendMessageToDevice(from_address, '已经取消您未支付手续费的合约');
+		});
+		return;
 	}
 
-	sendMessageToDevice(from_address, '您输入的信息无法识别，请尝试[重新发起流程](command:理财套餐)\n');
+	sendMessageToDevice(from_address, '您输入的信息无法识别，请重新输入或[重新发起流程](command:理财套餐)\n');
 });
 
 // validate commission and create lockup address

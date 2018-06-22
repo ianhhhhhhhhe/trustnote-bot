@@ -161,7 +161,30 @@ function postUserStatus(api, from_address, shared_address, lockupId, amount, cal
 	});
 }
 
+function getActivityStatus(api, callback){
+    request({
+        url: url + api,
+        method: 'GET',
+        headers:{
+            "Referer": 'localhost',
+            "Origin": 'http://localhost:8080'}
+        }, function(error, response, body){
+        if (!error && response.statusCode == 200) {
+            var result = JSON.parse(body);
+            // console.log('Menu: ' + result);
+            callback(result["entity"]);
+        } else {
+            if (error){
+                callback('', error);
+            } else if (response.statusCode != 200) {
+                callback('', error, response.statusCode);
+            }
+        }
+    });
+}
+
 exports.getLockupInfo = getLockupInfo;
 exports.getLockupMenu = getLockupMenu;
 exports.getUserStatus = getUserStatus;
 exports.postUserStatus = postUserStatus;
+exports.getActivityStatus = getActivityStatus;
