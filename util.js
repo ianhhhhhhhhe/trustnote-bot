@@ -3,10 +3,16 @@
 
 function timestampToDate(timestamp) {
 	var datetime = new Date(timestamp);
-	var year = datetime.getFullYear();
-	var month = datetime.getMonth() + 1;
-	var date = datetime.getDate();
-	var hours = datetime.getHours();
+	var year = datetime.getUTCFullYear();
+	var month = datetime.getUTCMonth() + 1;
+	var date = datetime.getUTCDate();
+	var hours = datetime.getUTCHours();
+	if (hours>=16){
+		hours = hours - 16;
+		date += 1;
+	} else {
+		hours += 8;
+	}
 	var minutes = datetime.getMinutes();
 	if(minutes < 10){
 		minutes = '0'+minutes;
