@@ -219,8 +219,8 @@ eventBus.on('text', function(from_address, text){
 		lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
 		lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
 		lockupDetail += ('起购额度: ' + util.formatNumbers(info["minAmount"]) + 'MN\n');
-		if(info["maxAmount"]){
-			lockupDetail += ('限购额度: ' + util.formatNumbers(info["maxAmount"]) + 'MN\n');
+		if(info["purchaseLimit"]){
+			lockupDetail += ('限购额度: ' + util.formatNumbers(info["purchaseLimit"]) + 'MN\n');
 		} else {
 			lockupDetail += '限购额度: 无上限\n'
 		}
