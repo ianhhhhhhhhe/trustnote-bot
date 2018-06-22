@@ -44,30 +44,30 @@ function updateLockupMenu(res){
 	res.map(function(lockup){
 		var financialBenefitsId = lockup["financialBenefitsId"];
 		lockup_list[lockup["financialBenefitsId"]] = lockup;
-		db.query('select * from lockups where financialBenefitsId=?', [financialBenefitsId], function(rows){
-			if(rows.length===0){
+		// db.query('select * from lockups where financialBenefitsId=?', [financialBenefitsId], function(rows){
+		// 	if(rows.length===0){
 				network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockup["financialBenefitsId"], function(info) {
-					db.query('insert into lockups (financialBenefitsId, activityStatus, financialId, \n\
-						financialRate, financialStatus, interestEndTime, \n\
-						interestStartTime, minAmount, nextPanicEndTime, \n\
-						nextPanicStartTime, panicEndTime, panicStartTime, \n\
-						panicTotalLimit, productName, purchaseLimit, \n\
-						remainLimit, unlockTime) \n\
-						values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', 
-						[info["id"], info["activityStatus"],info["financialId"], 
-						info["financialRate"], info["financialStatus"], info["interestEndTime"],
-						info["interestStartTime"], info["minAmount"], info["nextPanicEndTime"],
-						info["nextPanicStartTime"], info["panicEndTime"], info["panicStartTime"], 
-						info["panicTotalLimit"], info["productName"], info["purchaseLimit"], 
-						info["remainLimit"], info["unlockTime"]], function(){
+					// db.query('insert into lockups (financialBenefitsId, activityStatus, financialId, \n\
+					// 	financialRate, financialStatus, interestEndTime, \n\
+					// 	interestStartTime, minAmount, nextPanicEndTime, \n\
+					// 	nextPanicStartTime, panicEndTime, panicStartTime, \n\
+					// 	panicTotalLimit, productName, purchaseLimit, \n\
+					// 	remainLimit, unlockTime) \n\
+					// 	values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', 
+					// 	[info["id"], info["activityStatus"],info["financialId"], 
+					// 	info["financialRate"], info["financialStatus"], info["interestEndTime"],
+					// 	info["interestStartTime"], info["minAmount"], info["nextPanicEndTime"],
+					// 	info["nextPanicStartTime"], info["panicEndTime"], info["panicStartTime"], 
+					// 	info["panicTotalLimit"], info["productName"], info["purchaseLimit"], 
+					// 	info["remainLimit"], info["unlockTime"]], function(){
 						lockup_list[lockup["financialBenefitsId"]]["info"] = info;
-					});
+					// });
 				});
-			}
-			else {
-				lockup_list[lockup["financialBenefitsId"]]["info"] = rows[0];
-			}
-		})
+		// 	}
+		// 	else {
+		// 		lockup_list[lockup["financialBenefitsId"]]["info"] = rows[0];
+		// 	}
+		// })
 		// lockup_list[lockup["id"]] = lockup;
 		// network.getLockupInfo('/financial-benefits/push.htm', lockup["id"], function(info) {
 		// 	lockup_list[lockup["id"]]["info"] = info;
@@ -87,13 +87,13 @@ function sendGreeting(device_address){
 			return sendMessageToDevice(device_address, '该活动未开启，敬请期待')
 		}
 		updateLockupMenu(res);
-		var greeting_res = '欢迎进入持仓收益计划服务号，本活动长期有效，';
+		var greeting_res = '欢迎进入持仓收益计划服务号，本活动长期有效。';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
-			greeting_res += '当前共有 _'+ util.formatNumbers(total_users)+'人_ 参与，已持仓 _'+util.formatNumbers(total_amount)+'MN_ ，欢迎选择套餐参与\n\n';
+			greeting_res += '当前共有 _'+ util.formatNumbers(total_users)+'人_ 参与，已抢购 _'+util.formatNumbers(total_amount)+'MN_ ，欢迎选择套餐参与\n\n';
 			res.map(function(lockup) {
 				greeting_res+='['+lockup["financialName"]+lockup["financialRate"]*100+'%]';
 				greeting_res+='(command:#';
@@ -225,18 +225,15 @@ eventBus.on('text', function(from_address, text){
 			lockupDetail += '限购额度: 无上限\n'
 		}
 		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
-		switch(info["activityStatus"]){
-			case "进行中":
-			case "抢购进行中":
-				lockupDetail += ('\n状态: _' + info["activityStatus"] + '_ \n'); // _blue_ -blue- +red+
-				break;
-			case "已结束":
-			case "抢购已结束":
-				lockupDetail += ('\n状态: +' + info["activityStatus"] + '+ \n'); // _blue_ -blue- +red+
-				break;
-			default:
-				lockupDetail += ('\n状态: ' + info["activityStatus"] + ' \n'); // _blue_ -blue- +red+
-				break;
+		var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"];
+		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
+		// validate activity date
+		if(Date.now() <= panicStarttime){
+			lockupDetail += ('\n状态: 未开启 \n'); // _blue_ -blue- +red+
+		} else if(Date.now() >= panicEndtime){
+			lockupDetail += ('\n状态: +抢购已结束+ \n'); // _blue_ -blue- +red+
+		} else {
+			lockupDetail += ('\n状态: -抢购进行中- \n'); // _blue_ -blue- +red+
 		}
 		if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
 			lockupDetail += '\n下期抢购时间: '
