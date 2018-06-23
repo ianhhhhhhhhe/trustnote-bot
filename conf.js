@@ -4,13 +4,13 @@
 //exports.port = 6611;
 //exports.myUrl = 'wss://mydomain.com/bb';
 exports.bServeAsHub = false;
-exports.bLight = false;
+exports.bLight = true;
 exports.bIgnoreUnpairRequests = true;
 
 exports.storage = 'sqlite';
 
 
-exports.hub = '119.28.44.246:6616';
+exports.hub = 'raytest.trustnote.org';
 exports.deviceName = 'bot';
 exports.permanent_pairing_secret = '0000';
 exports.control_addresses = ['DEVICE ALLOWED TO CHAT'];
