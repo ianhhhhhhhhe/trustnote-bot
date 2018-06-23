@@ -224,7 +224,9 @@ eventBus.on('text', function(from_address, text){
 			lockupDetail += '\n下期抢购时间: 敬请期待'
 		}
 		sendMessageToDevice(from_address, lockupDetail);
-		sendMessageToDevice(from_address, '请点击[#'+ lockupId +'](command:#' + lockupId +')#开始抢购');
+		if(Date.now() >= panicStarttime && Date.now() < panicEndtime){
+			sendMessageToDevice(from_address, '请点击[#'+ lockupId +'](command:#' + lockupId +')#开始抢购');
+		}
 		return;
 	};
 
