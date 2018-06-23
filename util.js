@@ -53,12 +53,15 @@ function formatNumbers(number) {
 		return number;
 	else {
 		var mod = number.length % 3;
-		var output = (mod == 0 ? '' : (number.substring(0, mod)));
+	var output = (mod == 0 ? '' : (number.substring(0, mod)));
 	for (var i = 0; i < Math.floor(number.length / 3); i++) {
 		if ((mod == 0) && (i == 0))
 			output += number.substring(mod + 3 * i, mod + 3 * i + 3);
 		else
 			output += ',' + number.substring(mod + 3 * i, mod + 3 * i + 3);
+		}
+		if ((number - parseInt(number)) == 0){
+			return output + number;
 		}
 		return (output + (number - parseInt(number)));
 	}
