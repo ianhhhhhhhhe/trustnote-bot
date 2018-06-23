@@ -71,7 +71,7 @@ function sendGreeting(device_address){
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
-			greeting_res += '当前共有 _'+ util.formatNumbers(total_users)+'人_ 参与，已抢购 _'+util.formatNumbers(total_amount)+'MN_ ，欢迎选择套餐参与\n\n';
+			greeting_res += '当前共有 --'+ util.formatNumbers(total_users)+'人-- 参与，已抢购 --'+util.formatNumbers(total_amount)+'MN-- ，欢迎选择套餐参与\n\n';
 			res.map(function(lockup) {
 				greeting_res+='['+lockup["financialName"]+lockup["financialRate"]*100+'%]';
 				greeting_res+='(command:#';
@@ -213,9 +213,9 @@ eventBus.on('text', function(from_address, text){
 		if(Date.now() <= panicStarttime){
 			lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
 		} else if(Date.now() >= panicEndtime){
-			lockupDetail += ('\n状态: +抢购已结束+ \n'); // _blue_ -blue- +red+
+			lockupDetail += ('\n状态: ++抢购已结束++ \n'); // _blue_ -blue- +red+
 		} else {
-			lockupDetail += ('\n状态: -抢购进行中- \n'); // _blue_ -blue- +red+
+			lockupDetail += ('\n状态: --抢购进行中-- \n'); // _blue_ -blue- +red+
 		}
 		if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
 			lockupDetail += '\n下期抢购时间: '
@@ -280,7 +280,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 			network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info) {
 				if(!info){
 					console.log('Error'+info+'不存在');
-					return sendMessageToDevice(from_address, 'bot_似乎出了点问题，请联系Trustnote工作人员，错误代号l')
+					return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员，错误代号l')
 				}
 				lockup_list[lockupId]["info"] = info;
 				var unlock_date = info["unlockTime"];
