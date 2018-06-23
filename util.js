@@ -48,7 +48,7 @@ function timestampToDate(timestamp) {
 }
 
 function formatNumbers(number) {
-	number = '' + number;
+	number = '' + parseInt(number);
 	if (number.length <= 3)
 		return number;
 	else {
@@ -60,7 +60,7 @@ function formatNumbers(number) {
 		else
 			output += ',' + number.substring(mod + 3 * i, mod + 3 * i + 3);
 		}
-		return (output);
+		return (output + (num - parseInt(number)));
 	}
 }
 
