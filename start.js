@@ -179,7 +179,7 @@ eventBus.on('text', function(from_address, text){
 		if (amount<myMinAmount) {
 			return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
 		}
-		if (amount>remain){
+		if (amount>remain && lockup_list[lockupId]["id"]==1){
 			return sendMessageToDevice(from_address, '剩余额度不足，该套餐剩余额度为：'+ remain +'，请选择更低的购买额度');
 		}
 		return sendLockups.prePurchaseLockup(from_address, myAddress, amount, myLockupId);
@@ -206,7 +206,9 @@ eventBus.on('text', function(from_address, text){
 		} else {
 			lockupDetail += '限购额度: 无上限\n'
 		}
-		lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
+		if (lockup_list[lockupId]["id"]==1){
+			lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
+		}
 		var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"];
 		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
 		// validate activity date
