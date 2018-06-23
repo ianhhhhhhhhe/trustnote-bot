@@ -61,7 +61,7 @@ function formatNumbers(number) {
 			output += ',' + number.substring(mod + 3 * i, mod + 3 * i + 3);
 		}
 		if ((number - parseInt(number)) == 0){
-			return output + number;
+			return output;
 		}
 		return (output + (number - parseInt(number)));
 	}
