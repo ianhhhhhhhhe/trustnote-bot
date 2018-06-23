@@ -21,31 +21,34 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 	// check unfinished bill
 	db.query('select * from user_status where from_address=? and lockupId=?', [from_address, lockupId], function(rows){
 		if(rows.length!==0){
-			if(rows[0]["sent"]==0){
-				// sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓，请支付该手续费后再购买其他套餐');
+			db.query('update user_status set amount=? where from_address=? and lockupId=?', [amount, from_address, lockupId], function(){
+				if(rows[0]["sent"]==0){
+					// sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓，请支付该手续费后再购买其他套餐');
+					// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
+					sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
+				}
+				if(rows[0]["sent"]==1){
+					// query database and check if client has put required amout into the address
+					// sendMessageToDevice(from_address, '你已参加过该活动，请选择其他套餐或关注下期活动');
+					network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
+						result.map(function(lockup){
+							if(lockup["sharedAddress"]===rows[0]["shared_address"]){
+								sendMessageToDevice(from_address, '请['+rows[0]["amount"]+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+rows[0]["amount"]*1000000+')以完成锁仓激励计划：\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
+								//'本次解锁后的收益为'+rows[0]["amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
+							}
+						})
+					});
+				}
+				return;
+			});
+		} else {
+			db.query('insert into user_status (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
+				// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 				// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
 				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
-			}
-			if(rows[0]["sent"]==1){
-				// query database and check if client has put required amout into the address
-				// sendMessageToDevice(from_address, '你已参加过该活动，请选择其他套餐或关注下期活动');
-				network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
-					result.map(function(lockup){
-						if(lockup["sharedAddress"]===rows[0]["shared_address"]){
-							sendMessageToDevice(from_address, '请['+rows[0]["amount"]+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+rows[0]["amount"]*1000000+')以完成锁仓激励计划：\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
-							//'本次解锁后的收益为'+rows[0]["amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
-						}
-					})
-				});
-			}
-			return;
+				return;
+			})
 		}
-		db.query('insert into user_status (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
-			// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
-			// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
-			sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
-			return;
-		})
 	})
 	
 }
