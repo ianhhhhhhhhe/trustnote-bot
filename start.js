@@ -42,32 +42,10 @@ function updateLockupMenu(res){
 	// Inital lockup_list
 	lockup_list = {};
 	res.map(function(lockup){
-		var financialBenefitsId = lockup["financialBenefitsId"];
 		lockup_list[lockup["financialBenefitsId"]] = lockup;
-		// db.query('select * from lockups where financialBenefitsId=?', [financialBenefitsId], function(rows){
-		// 	if(rows.length===0){
-				network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockup["financialBenefitsId"], function(info) {
-					// db.query('insert into lockups (financialBenefitsId, activityStatus, financialId, \n\
-					// 	financialRate, financialStatus, interestEndTime, \n\
-					// 	interestStartTime, minAmount, nextPanicEndTime, \n\
-					// 	nextPanicStartTime, panicEndTime, panicStartTime, \n\
-					// 	panicTotalLimit, productName, purchaseLimit, \n\
-					// 	remainLimit, unlockTime) \n\
-					// 	values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', 
-					// 	[info["id"], info["activityStatus"],info["financialId"], 
-					// 	info["financialRate"], info["financialStatus"], info["interestEndTime"],
-					// 	info["interestStartTime"], info["minAmount"], info["nextPanicEndTime"],
-					// 	info["nextPanicStartTime"], info["panicEndTime"], info["panicStartTime"], 
-					// 	info["panicTotalLimit"], info["productName"], info["purchaseLimit"], 
-					// 	info["remainLimit"], info["unlockTime"]], function(){
-						lockup_list[lockup["financialBenefitsId"]]["info"] = info;
-					// });
-				});
-		// 	}
-		// 	else {
-		// 		lockup_list[lockup["financialBenefitsId"]]["info"] = rows[0];
-		// 	}
-		// })
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockup["financialBenefitsId"], function(info) {
+			lockup_list[lockup["financialBenefitsId"]]["info"] = info;
+		});
 		// lockup_list[lockup["id"]] = lockup;
 		// network.getLockupInfo('/financial-benefits/push.htm', lockup["id"], function(info) {
 		// 	lockup_list[lockup["id"]]["info"] = info;
@@ -197,8 +175,12 @@ eventBus.on('text', function(from_address, text){
 		var myAddress = users_status[from_address]["address"]
 		var myLockupId = users_status[from_address]["lockupId"];
 		var myMinAmount = lockup_list[myLockupId]["info"]["minAmount"];
+		var remain = lockup_list[myLockupId]["info"]["remainLimit"];
 		if (amount<myMinAmount) {
 			return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
+		}
+		if (amount>remain){
+			return sendMessageToDevice(from_address, '剩余额度不足，该套餐剩余额度为：'+ remain +'，请选择更低的购买额度');
 		}
 		return sendLockups.prePurchaseLockup(from_address, myAddress, amount, myLockupId);
 	}
@@ -229,7 +211,7 @@ eventBus.on('text', function(from_address, text){
 		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
 		// validate activity date
 		if(Date.now() <= panicStarttime){
-			lockupDetail += ('\n状态: 未开启 \n'); // _blue_ -blue- +red+
+			lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
 		} else if(Date.now() >= panicEndtime){
 			lockupDetail += ('\n状态: +抢购已结束+ \n'); // _blue_ -blue- +red+
 		} else {
@@ -294,18 +276,40 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var address = rows[0].address;
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
-		var unlock_date = lockup_list[lockupId]["info"]["unlockTime"];
-		var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"];
-		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
-		// validate activity date
-		if(Date.now() <= panicStarttime){
-			return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
+		if(!lockup_list[lockupId]){
+			network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info) {
+				if(!info){
+					console.log('Error'+info+'不存在');
+					return sendMessageToDevice(from_address, 'bot_似乎出了点问题，请联系Trustnote工作人员，错误代号l')
+				}
+				lockup_list[lockupId]["info"] = info;
+				var unlock_date = info["unlockTime"];
+				var panicStarttime = info["panicStartTime"];
+				var panicEndtime = info["panicEndTime"];
+				// validate activity date
+				if(Date.now() <= panicStarttime){
+					return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
+				}
+				if(Date.now() >= panicEndtime){
+					return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
+				}
+				// create and store shared address, send result to user and server
+				return sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
+			});
+		} else {
+			var unlock_date = lockup_list[lockupId]["info"]["unlockTime"];
+			var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"];
+			var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
+			// validate activity date
+			if(Date.now() <= panicStarttime){
+				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
+			}
+			if(Date.now() >= panicEndtime){
+				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
+			}
+			// create and store shared address, send result to user and server
+			return sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 		}
-		if(Date.now() >= panicEndtime){
-			return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
-		}
-		// create and store shared address, send result to user and server
-		sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 	});
 });
 
