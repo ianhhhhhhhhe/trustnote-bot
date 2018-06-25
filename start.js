@@ -215,6 +215,10 @@ eventBus.on('text', function(from_address, text){
 		if(Date.now() <= panicStarttime){
 			lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
 		} else if(Date.now() >= panicEndtime){
+			// remove expired lockup
+			db.query('delete from user_status where lockupId=?', [lockupId], function(){
+				console.log('Remove expired lockup, lockupId: '+lockupId);
+			});
 			lockupDetail += ('\n状态: ++抢购已结束++ \n'); // _blue_ -blue- +red+
 		} else {
 			lockupDetail += ('\n状态: --抢购进行中-- \n'); // _blue_ -blue- +red+
@@ -280,40 +284,29 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var address = rows[0].address;
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
-		if(!lockup_list[lockupId]){
-			network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info) {
-				if(!info){
-					console.log('Error'+info+'不存在');
-					return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员，错误代号l')
-				}
-				lockup_list[lockupId]["info"] = info;
-				var unlock_date = info["unlockTime"];
-				var panicStarttime = info["panicStartTime"];
-				var panicEndtime = info["panicEndTime"];
-				// validate activity date
-				if(Date.now() <= panicStarttime){
-					return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
-				}
-				if(Date.now() >= panicEndtime){
-					return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
-				}
-				// create and store shared address, send result to user and server
-				return sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
-			});
-		} else {
-			var unlock_date = lockup_list[lockupId]["info"]["unlockTime"];
-			var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"];
-			var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info) {
+			if(!info){
+				console.log('Error'+info+'不存在');
+				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员，错误代号l')
+			}
+			lockup_list[lockupId]["info"] = info;
+			var unlock_date = info["unlockTime"];
+			var panicStarttime = info["panicStartTime"];
+			var panicEndtime = info["panicEndTime"];
 			// validate activity date
 			if(Date.now() <= panicStarttime){
 				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
 			}
 			if(Date.now() >= panicEndtime){
+				// remove expired lockup
+				db.query('delete from user_status where lockupId=?', [lockupId], function(){
+					console.log('Remove expired lockup, lockupId: '+lockupId);
+				});
 				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
 			}
 			// create and store shared address, send result to user and server
 			return sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
-		}
+		});
 	});
 });
 
