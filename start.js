@@ -180,7 +180,7 @@ eventBus.on('text', function(from_address, text){
 		if (amount<myMinAmount) {
 			return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
 		}
-		if (amount>myMaxAmount) {
+		if (amount>myMaxAmount && myMaxAmount!=0) {
 			return sendMessageToDevice(from_address, '最高金额不能小于'+myMaxAmount+'MN，请重新输入');
 		}
 		if (amount>remain && lockup_list[myLockupId]["id"]==1){
