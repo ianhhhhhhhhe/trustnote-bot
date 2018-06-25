@@ -175,9 +175,13 @@ eventBus.on('text', function(from_address, text){
 		var myAddress = users_status[from_address]["address"]
 		var myLockupId = users_status[from_address]["lockupId"];
 		var myMinAmount = lockup_list[myLockupId]["info"]["minAmount"];
+		var myMaxAmount = lockup_list[myLockupId]["info"]["purchaseLimit"]
 		var remain = lockup_list[myLockupId]["info"]["remainLimit"];
 		if (amount<myMinAmount) {
 			return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
+		}
+		if (amount>myMaxAmount) {
+			return sendMessageToDevice(from_address, '最高金额不能小于'+myMaxAmount+'MN，请重新输入');
 		}
 		if (amount>remain && lockup_list[myLockupId]["id"]==1){
 			return sendMessageToDevice(from_address, '剩余额度不足，该套餐剩余额度为：'+ remain +'，请选择更低的购买额度');
