@@ -214,7 +214,7 @@ eventBus.on('text', function(from_address, text){
 		// validate activity date
 		if(Date.now() <= panicStarttime){
 			lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
-		} else if(Date.now() >= panicEndtime){
+		} else if(Date.now() >= panicEndtime && info["remainLimit"]<=0){
 			// remove expired lockup
 			db.query('delete from user_status where lockupId=?', [lockupId], function(){
 				console.log('Remove expired lockup, lockupId: '+lockupId);
@@ -297,7 +297,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 			if(Date.now() <= panicStarttime){
 				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
 			}
-			if(Date.now() >= panicEndtime){
+			if(Date.now() >= panicEndtime && info["remainLimit"]<=0){
 				// remove expired lockup
 				db.query('delete from user_status where lockupId=?', [lockupId], function(){
 					console.log('Remove expired lockup, lockupId: '+lockupId);
