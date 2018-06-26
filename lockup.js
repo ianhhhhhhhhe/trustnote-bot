@@ -27,7 +27,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 			sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
 			return;
 		})
-	}
+	})
 }
 
 function purchaseLockup(from_address, account_address, amount, lockupId, unlock_date){
