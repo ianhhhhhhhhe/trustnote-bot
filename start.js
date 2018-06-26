@@ -221,7 +221,7 @@ eventBus.on('text', function(from_address, text){
 				return sendMessageToDevice(from_address, '最高金额不能大于'+myMaxAmount+'MN，请重新输入');
 			}
 			if (amount>remain){
-				return sendMessageToDevice(from_address, '剩余额度不足，该套餐剩余额度为：'+( remain>=0 ? remain : 0 )+'，请选择更低的购买额度');
+				return sendMessageToDevice(from_address, '剩余额度不足，该套餐剩余额度为：'+( remain>=0 ? remain : 0 )+'MN，请选择更低的购买额度');
 			}
 			return sendLockups.prePurchaseLockup(from_address, myAddress, amount, myLockupId);
 		});

@@ -19,7 +19,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 	record user order records
 	*/
 	// remove all unfinished order
-	db.query('delete from user_status where from_address=? and sent=0', [from_address], function(){
+	db.query('delete from user_status where from_address=?', [from_address], function(){
 		// insert new order
 		db.query('insert into user_status (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
 			// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
