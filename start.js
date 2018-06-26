@@ -64,11 +64,16 @@ function sendGreeting(device_address){
 		if(res.length===0){
 			return sendMessageToDevice(device_address, '该活动未开启，敬请期待')
 		}
-		updateLockupMenu(res);
+		// updateLockupMenu(res);
 		var greeting_res = '欢迎进入持仓收益计划服务号，本活动长期有效。';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
+			if (error) {
+				sendMessageToDevice(device_address, error)
+			} else if (status_code) {
+				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			}
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
 			greeting_res += '当前共有 --'+ util.formatNumbers(total_users)+'人-- 参与，已抢购 --'+util.formatNumbers(total_amount)+'MN-- ，欢迎选择套餐参与\n\n';
@@ -132,38 +137,43 @@ eventBus.on('text', function(from_address, text){
 		var arrNumbers = text.split("#");
 		// get lockup term
 		var lockupId = arrNumbers[1];
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
+			if (error) {
+				sendMessageToDevice(device_address, error)
+			} else if (status_code) {
+				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			}
+			if (!info){
+				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
+			}
+			// get unlock date
+			var unlock_date = info["interestEndTime"];
+			var panicStarttime = info["panicStartTime"]
+			var panicEndtime = info["panicEndTime"]
+			// validate activity date
+			if(Date.now() <= panicStarttime){
+				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
+			}
+			if(Date.now() >= panicEndtime){
+				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
+			}
+			users_status[from_address] = {
+				"address": address,
+				"lockupId": lockupId,
+				"unlock_date": unlock_date
+			}
+			if (info["financialId"]==1){
+				users_status[from_address]["amount"] = info["minAmount"];
+				var myAddress = users_status[from_address]["address"]
+				var myLockupId = users_status[from_address]["lockupId"];
+				var myMinAmount = info["minAmount"];
+				return sendLockups.prePurchaseLockup(from_address, myAddress, myMinAmount, myLockupId);
+			}
+			return sendMessageToDevice(from_address, '请输入抢购数量（例如：25000MN）');
+			// return sendLockups.prePurchaseLockup(from_address, address, amount, lockupId);
+		})
 		// check if lockup is available
-		if (!lockup_list[lockupId]){
-			return sendMessageToDevice(from_address, '未找到该活动，请参与[其他套餐](command:理财套餐)');
-		}
-		if(!lockup_list[lockupId]["info"]){
-			return sendMessageToDevice(from_address, "活动暂未开启，敬请期待")
-		}
-		// get unlock date
-		var unlock_date = lockup_list[lockupId]["info"]["interestEndTime"];
-		var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"]
-		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"]
-		// validate activity date
-		if(Date.now() <= panicStarttime){
-			return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
-		}
-		if(Date.now() >= panicEndtime){
-			return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
-		}
-		users_status[from_address] = {
-			"address": address,
-			"lockupId": lockupId,
-			"unlock_date": unlock_date
-		}
-		if (lockup_list[lockupId]["id"]==1){
-			users_status[from_address]["amount"] = lockup_list[lockupId]["info"]["minAmount"];
-			var myAddress = users_status[from_address]["address"]
-			var myLockupId = users_status[from_address]["lockupId"];
-			var myMinAmount = lockup_list[myLockupId]["info"]["minAmount"];
-			return sendLockups.prePurchaseLockup(from_address, myAddress, myMinAmount, myLockupId);
-		}
-		return sendMessageToDevice(from_address, '请输入抢购数量（例如：25000MN）');
-		// return sendLockups.prePurchaseLockup(from_address, address, amount, lockupId);
+		return;
 	}
 
 	if (text.match(/^\d+(MN)?$/i)) {
@@ -174,11 +184,18 @@ eventBus.on('text', function(from_address, text){
 		}
 		var myAddress = users_status[from_address]["address"]
 		var myLockupId = users_status[from_address]["lockupId"];
-		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info) {
-			lockup_list[myLockupId]["info"] = info;
-			var myMinAmount = lockup_list[myLockupId]["info"]["minAmount"];
-			var myMaxAmount = lockup_list[myLockupId]["info"]["purchaseLimit"]
-			var remain = lockup_list[myLockupId]["info"]["remainLimit"];
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
+			if (error) {
+				sendMessageToDevice(device_address, error)
+			} else if (status_code) {
+				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			}
+			if(!info){
+				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
+			}
+			var myMinAmount = info["minAmount"];
+			var myMaxAmount = info["purchaseLimit"]
+			var remain = info["remainLimit"];
 			if (amount<myMinAmount) {
 				return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
 			}
@@ -195,51 +212,54 @@ eventBus.on('text', function(from_address, text){
 	// return lockup detail
 	if (text.match(/^#\d+$/)){
 		var lockupId = text.match(/\d+/);
-		if (!lockup_list[lockupId]){
-			return sendMessageToDevice(from_address, '未找到该活动，请参与[其他套餐](command:理财套餐)');
-		}
-		var info = lockup_list[lockupId]["info"];
-		if(!info){
-			return sendMessageToDevice(from_address, '活动暂未开启，敬请期待');
-		}
-		var lockupDetail = ('产品名称: ' + info["productName"] +'\n\n');
-		lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
-		lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
-		lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
-		lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
-		lockupDetail += ('起购额度: ' + util.formatNumbers(info["minAmount"]) + 'MN\n');
-		if(info["purchaseLimit"]){
-			lockupDetail += ('限购额度: ' + util.formatNumbers(info["purchaseLimit"]) + 'MN\n');
-		} else {
-			lockupDetail += '限购额度: 无上限\n'
-		}
-		if (lockup_list[lockupId]["id"]==1){
-			lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
-		}
-		var panicStarttime = lockup_list[lockupId]["info"]["panicStartTime"];
-		var panicEndtime = lockup_list[lockupId]["info"]["panicEndTime"];
-		// validate activity date
-		if(Date.now() <= panicStarttime){
-			lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
-		} else if(Date.now() >= panicEndtime || info["remainLimit"]<=0){
-			// remove expired lockup
-			db.query('delete from user_status where lockupId=?', [lockupId], function(){
-				console.log('Remove expired lockup, lockupId: '+lockupId);
-			});
-			lockupDetail += ('\n状态: ++抢购已结束++ \n'); // _blue_ -blue- +red+
-		} else {
-			lockupDetail += ('\n状态: --抢购进行中-- \n'); // _blue_ -blue- +red+
-		}
-		if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
-			lockupDetail += '\n下期抢购时间: '
-			lockupDetail += (util.timestampToDate(info["nextPanicStartTime"]) + ' - ' + util.timestampToDate(info["nextPanicEndTime"]));
-		} else {
-			lockupDetail += '\n下期抢购时间: 敬请期待'
-		}
-		sendMessageToDevice(from_address, lockupDetail);
-		if(Date.now() >= panicStarttime && Date.now() < panicEndtime){
-			sendMessageToDevice(from_address, '请点击[#'+ lockupId +'](command:#' + lockupId +')#开始抢购');
-		}
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
+			if (error) {
+				sendMessageToDevice(device_address, error)
+			} else if (status_code) {
+				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			}
+			if (!info){
+				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
+			}
+			var lockupDetail = ('产品名称: ' + info["productName"] +'\n\n');
+			lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
+			lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
+			lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
+			lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
+			lockupDetail += ('起购额度: ' + util.formatNumbers(info["minAmount"]) + 'MN\n');
+			if(info["purchaseLimit"]){
+				lockupDetail += ('限购额度: ' + util.formatNumbers(info["purchaseLimit"]) + 'MN\n');
+			} else {
+				lockupDetail += '限购额度: 无上限\n'
+			}
+			if (info["financialId"]==1){
+				lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
+			}
+			var panicStarttime = info["panicStartTime"];
+			var panicEndtime = info["panicEndTime"];
+			// validate activity date
+			if(Date.now() <= panicStarttime){
+				lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
+			} else if(Date.now() >= panicEndtime || info["remainLimit"]<=0){
+				// remove expired lockup
+				db.query('delete from user_status where lockupId=?', [lockupId], function(){
+					console.log('Remove expired lockup, lockupId: '+lockupId);
+				});
+				lockupDetail += ('\n状态: ++抢购已结束++ \n'); // _blue_ -blue- +red+
+			} else {
+				lockupDetail += ('\n状态: --抢购进行中-- \n'); // _blue_ -blue- +red+
+			}
+			if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
+				lockupDetail += '\n下期抢购时间: '
+				lockupDetail += (util.timestampToDate(info["nextPanicStartTime"]) + ' - ' + util.timestampToDate(info["nextPanicEndTime"]));
+			} else {
+				lockupDetail += '\n下期抢购时间: 敬请期待'
+			}
+			sendMessageToDevice(from_address, lockupDetail);
+			if(Date.now() >= panicStarttime && Date.now() < panicEndtime){
+				sendMessageToDevice(from_address, '请点击[#'+ lockupId +'](command:#' + lockupId +')#开始抢购');
+			}
+		})
 		return;
 	};
 
@@ -249,7 +269,12 @@ eventBus.on('text', function(from_address, text){
 	// if sent === 1 means the commission has been paid
 	if (text.match(/^我的合约状态$/)){
 		// get users payment status from server
-		network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
+		network.getUserStatus('/financial-lockup/all.htm', from_address, function(result, error, status_code){
+			if (error) {
+				sendMessageToDevice(device_address, error)
+			} else if (status_code) {
+				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			}
 			result.map(function(lockup){
 				var res = '';
 				res += ('合约地址：' + lockup["sharedAddress"] + '\n');
@@ -291,12 +316,16 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var address = rows[0].address;
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
-		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info) {
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
+			if (error) {
+				sendMessageToDevice(device_address, error)
+			} else if (status_code) {
+				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			}
 			if(!info){
 				console.log('Error'+info+'不存在');
-				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员，错误代号l')
+				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员，错误代号:', status_code)
 			}
-			lockup_list[lockupId]["info"] = info;
 			var unlock_date = info["unlockTime"];
 			var panicStarttime = info["panicStartTime"];
 			var panicEndtime = info["panicEndTime"];
