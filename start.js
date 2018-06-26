@@ -191,10 +191,10 @@ eventBus.on('text', function(from_address, text){
 			sendMessageToDevice(from_address, '请先选择套餐');
 			return sendGreeting(from_address);
 		}
-		var myAddress = users_status[from_address]["address"]
+		var myAddress = users_status[from_address]["address"];
 		var myLockupId = users_status[from_address]["lockupId"];
-		if(!myAddress || !myLockupId){
-			return sendMessageToDevice(from_address, '数据缺失，请[重新发起流程](command:理财套餐)')
+		if(!myAddress || !myLockupId || Number.isInteger(myLockupId)){
+			return sendMessageToDevice(from_address, '数据缺失或存在不合法数据，请[重新发起流程](command:理财套餐)')
 		}
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
