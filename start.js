@@ -199,7 +199,7 @@ eventBus.on('text', function(from_address, text){
 		if(isNaN(myLockupId)){
 			return sendMessageToDevice(from_address, '套餐ID错误，请[重新发起流程](command:理财套餐)');
 		}
-		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', myLockupId, function(info, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
