@@ -219,6 +219,7 @@ eventBus.on('text', function(from_address, text){
 			}
 			return sendLockups.prePurchaseLockup(from_address, myAddress, amount, myLockupId);
 		});
+		return;
 	}
 
 	// return lockup detail
