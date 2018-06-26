@@ -17,25 +17,25 @@ var assocSessions = {};
 var lockup_list={};
 var users_status={};
 
-function resumeSession(device_address){
-	if (!assocSessions[device_address])
-		assocSessions[device_address] = {};
-	assocSessions[device_address].ts = Date.now();
+function resumeSession(from_address){
+	if (!assocSessions[from_address])
+		assocSessions[from_address] = {};
+	assocSessions[from_address].ts = Date.now();
 }
 
 function purgeOldSessions(){
 	console.log('purging old sessions');
 	var cutoff_ts = Date.now() - SESSION_TIMEOUT;
-	for (var device_address in assocSessions)
-		if (assocSessions[device_address].ts < cutoff_ts)
-			delete assocSessions[device_address];
+	for (var from_address in assocSessions)
+		if (assocSessions[from_address].ts < cutoff_ts)
+			delete assocSessions[from_address];
 }
 setInterval(purgeOldSessions, SESSION_TIMEOUT);
 
-function sendMessageToDevice(device_address, text){
+function sendMessageToDevice(from_address, text){
 	var device = require('trustnote-common/device.js');
-	device.sendMessageToDevice(device_address, 'text', text);
-//	assocSessions[device_address].ts = Date.now();
+	device.sendMessageToDevice(from_address, 'text', text);
+//	assocSessions[from_address].ts = Date.now();
 }
 
 function updateLockupMenu(res){
@@ -53,19 +53,19 @@ function updateLockupMenu(res){
 	})
 }
 
-function sendGreeting(device_address){
+function sendGreeting(from_address){
 	// get lockup service information
 	network.getLockupMenu('/financial/home.htm', function(res, error, status_code) {
 		if (error) {
 			console.log('Error: ', error);
-			sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+			sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 			return;
 		} else if (status_code) {
-			sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			sendMessageToDevice(from_address, 'Status code: ' + status_code);
 			return;
 		}
 		if(res.length===0){
-			return sendMessageToDevice(device_address, '该活动未开启，敬请期待')
+			return sendMessageToDevice(from_address, '该活动未开启，敬请期待')
 		}
 		// updateLockupMenu(res);
 		var greeting_res = '欢迎进入持仓收益计划服务号，本活动长期有效。';
@@ -74,10 +74,10 @@ function sendGreeting(device_address){
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
-				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code);
 				return;
 			}
 			var total_users = res2["total_user"];
@@ -90,9 +90,9 @@ function sendGreeting(device_address){
 				greeting_res+=')\n';
 			})
 			// greeting_res+='\n输入套餐id查询套餐状态';
-			sendMessageToDevice(device_address, greeting_res);
-			// sendMessageToDevice(device_address, DEFAULT_GREETING);
-			assocSessions[device_address].greeting_ts = Date.now();
+			sendMessageToDevice(from_address, greeting_res);
+			// sendMessageToDevice(from_address, DEFAULT_GREETING);
+			assocSessions[from_address].greeting_ts = Date.now();
 		})
 	});
 }
@@ -193,6 +193,9 @@ eventBus.on('text', function(from_address, text){
 		}
 		var myAddress = users_status[from_address]["address"]
 		var myLockupId = users_status[from_address]["lockupId"];
+		if(!myAddress || !myLockupId){
+			return sendMessageToDevice(from_address, '数据缺失，请[重新发起流程](command:理财套餐)')
+		}
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
@@ -312,7 +315,7 @@ eventBus.on('text', function(from_address, text){
 
 	// cancel my unfinished bill
 	if (text.match(/^取消未支付手续费的合约$/)){
-		db.query('delete from user_status where device_address=? and sent=0', [from_address], function(){
+		db.query('delete from user_status where from_address=? and sent=0', [from_address], function(){
 			sendMessageToDevice(from_address, '已经取消您未支付手续费的合约');
 		});
 		return;
