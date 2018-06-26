@@ -57,9 +57,12 @@ function sendGreeting(device_address){
 	// get lockup service information
 	network.getLockupMenu('/financial/home.htm', function(res, error, status_code) {
 		if (error) {
-			sendMessageToDevice(device_address, error)
+			console.log('Error: ', error);
+			sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+			return;
 		} else if (status_code) {
 			sendMessageToDevice(device_address, 'Status code: ' + status_code);
+			return;
 		}
 		if(res.length===0){
 			return sendMessageToDevice(device_address, '该活动未开启，敬请期待')
@@ -70,9 +73,12 @@ function sendGreeting(device_address){
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
 			if (error) {
-				sendMessageToDevice(device_address, error)
+				console.log('Error: ', error);
+				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				return;
 			} else if (status_code) {
 				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				return;
 			}
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
@@ -139,9 +145,12 @@ eventBus.on('text', function(from_address, text){
 		var lockupId = arrNumbers[1];
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
-				sendMessageToDevice(device_address, error)
+				console.log('Error: ', error);
+				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500')
+				return;
 			} else if (status_code) {
 				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				return;
 			}
 			if (!info){
 				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
@@ -186,9 +195,12 @@ eventBus.on('text', function(from_address, text){
 		var myLockupId = users_status[from_address]["lockupId"];
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
-				sendMessageToDevice(device_address, error)
+				console.log('Error: ', error);
+				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				return;
 			} else if (status_code) {
 				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				return;
 			}
 			if(!info){
 				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
@@ -214,9 +226,12 @@ eventBus.on('text', function(from_address, text){
 		var lockupId = text.match(/\d+/);
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
-				sendMessageToDevice(device_address, error)
+				console.log('Error: ', error);
+				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				return;
 			} else if (status_code) {
 				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				return;
 			}
 			if (!info){
 				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
@@ -271,9 +286,12 @@ eventBus.on('text', function(from_address, text){
 		// get users payment status from server
 		network.getUserStatus('/financial-lockup/all.htm', from_address, function(result, error, status_code){
 			if (error) {
-				sendMessageToDevice(device_address, error)
+				console.log('Error: ', error);
+				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				return;
 			} else if (status_code) {
 				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				return;
 			}
 			result.map(function(lockup){
 				var res = '';
@@ -318,9 +336,12 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var lockupId = rows[0].lockupId;
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
-				sendMessageToDevice(device_address, error)
+				console.log('Error: ', error);
+				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				return;
 			} else if (status_code) {
 				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				return;
 			}
 			if(!info){
 				console.log('Error'+info+'不存在');
