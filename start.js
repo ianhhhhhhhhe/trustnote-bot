@@ -146,10 +146,10 @@ eventBus.on('text', function(from_address, text){
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
-				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500')
+				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500')
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code);
 				return;
 			}
 			if (!info){
@@ -196,10 +196,10 @@ eventBus.on('text', function(from_address, text){
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
-				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code);
 				return;
 			}
 			if(!info){
@@ -228,10 +228,10 @@ eventBus.on('text', function(from_address, text){
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
-				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code);
 				return;
 			}
 			if (!info){
@@ -288,10 +288,10 @@ eventBus.on('text', function(from_address, text){
 		network.getUserStatus('/financial-lockup/all.htm', from_address, function(result, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
-				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code);
 				return;
 			}
 			result.map(function(lockup){
@@ -338,10 +338,10 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
-				sendMessageToDevice(device_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(device_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code);
 				return;
 			}
 			if(!info){
