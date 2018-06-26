@@ -68,7 +68,7 @@ function sendGreeting(from_address){
 			return sendMessageToDevice(from_address, '该活动未开启，敬请期待')
 		}
 		// updateLockupMenu(res);
-		var greeting_res = '欢迎进入持仓收益计划服务号，本活动长期有效。';
+		var greeting_res = '欢迎进入锁仓激励服务，本活动长期有效。';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
@@ -133,7 +133,7 @@ eventBus.on('text', function(from_address, text){
 	if (text.match(/hello/i))
 		return sendMessageToDevice(from_address, DEFAULT_GREETING);
 	// get latest lockup menu
-	if (text.match(/greeting/i) || text.match(/理财套餐/i))
+	if (text.match(/理财套餐/i))
 	    return sendGreeting(from_address);
 
 	// pre-purchase lockup
@@ -149,7 +149,7 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500')
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
 				return;
 			}
 			if (!info){
@@ -202,7 +202,7 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
 				return;
 			}
 			if(!info){
@@ -234,7 +234,7 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
 				return;
 			}
 			if (!info){
@@ -294,7 +294,7 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code + '请[重新发起流程](command:理财套餐)');
 				return;
 			}
 			result.map(function(lockup){
@@ -344,7 +344,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code);
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
 				return;
 			}
 			if(!info){
