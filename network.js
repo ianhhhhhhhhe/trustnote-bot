@@ -33,7 +33,7 @@ function getLockupMenu(api, callback){
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
             // console.log('Menu: ' + result);
-			callback(result["entity"]);
+			callback(result["entity"], null, null, result["code"], result["hasMore"], result["msg"]);
 		} else {
             if (error){
                 callback('', error);
@@ -76,7 +76,7 @@ function getLockupInfo(api, lockupID, callback){
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
             // console.log('Menu: ' + result);
-			callback(result["entity"]);
+			callback(result["entity"], null, null, result["code"], result["hasMore"], result["msg"]);
 		} else {
             if (error){
                 callback('', error);
@@ -119,7 +119,7 @@ function getUserStatus(api, device_address, callback) {
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
             // console.log('Menu: ' + result);
-			callback(result['entity']);
+			callback(result['entity'], null, null, result["code"], result["hasMore"], result["msg"]);
 		} else {
             if (error){
                 callback('', error);
@@ -150,7 +150,7 @@ function postUserStatus(api, from_address, shared_address, lockupId, amount, cal
 		if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
             // console.log('Menu: ' + result);
-			callback(result["entity"]);
+			callback(result["entity"], null, null, result["code"], result["hasMore"], result["msg"]);
 		} else {
             if (error){
                 callback('', error);
@@ -172,7 +172,7 @@ function getActivityStatus(api, callback){
         if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
             // console.log('Menu: ' + result);
-            callback(result["entity"]);
+            callback(result["entity"], null, null, result["code"], result["hasMore"], result["msg"]);
         } else {
             if (error){
                 callback('', error);
