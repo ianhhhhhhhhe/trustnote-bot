@@ -341,6 +341,9 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		var address = rows[0].address;
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
+		if(!lockupId){
+			return sendMessageToDevice(from_address, '为选择锁仓激励服务');
+		}
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
