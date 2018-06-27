@@ -133,7 +133,7 @@ eventBus.on('text', function(from_address, text){
 	if (text.match(/hello/i))
 		return sendMessageToDevice(from_address, DEFAULT_GREETING);
 	// get latest lockup menu
-	if (text.match(/理财套餐/i))
+	if (text.match(/锁仓激励服务/i))
 	    return sendGreeting(from_address);
 
 	// pre-purchase lockup
@@ -149,11 +149,11 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, '服务器似乎出了点问题，请联系Trustnote工作人员,code:500')
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
 				return;
 			}
 			if (!info){
-				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
+				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
 			}
 			// get unlock date
 			var unlock_date = info["interestEndTime"];
@@ -164,7 +164,7 @@ eventBus.on('text', function(from_address, text){
 				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
 			}
 			if(Date.now() >= panicEndtime){
-				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
+				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:锁仓激励服务)");
 			}
 			users_status[from_address] = {
 				"address": address,
@@ -194,10 +194,10 @@ eventBus.on('text', function(from_address, text){
 		var myAddress = users_status[from_address]["address"];
 		var myLockupId = parseInt(users_status[from_address]["lockupId"]);
 		if(!myAddress || !myLockupId){
-			return sendMessageToDevice(from_address, '数据缺失，请[重新发起流程](command:理财套餐)');
+			return sendMessageToDevice(from_address, '数据缺失，请[重新发起流程](command:锁仓激励服务)');
 		}
 		if(isNaN(myLockupId)){
-			return sendMessageToDevice(from_address, '套餐ID错误，请[重新发起流程](command:理财套餐)');
+			return sendMessageToDevice(from_address, '套餐ID错误，请[重新发起流程](command:锁仓激励服务)');
 		}
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', myLockupId, function(info, error, status_code){
 			if (error) {
@@ -205,11 +205,11 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
 				return;
 			}
 			if(!info){
-				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
+				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
 			}
 			var myMinAmount = info["minAmount"];
 			var myMaxAmount = info["purchaseLimit"]
@@ -237,11 +237,11 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
 				return;
 			}
 			if (!info){
-				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:理财套餐)');
+				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
 			}
 			var lockupDetail = ('产品名称: ' + info["productName"] +'\n\n');
 			lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
@@ -297,7 +297,7 @@ eventBus.on('text', function(from_address, text){
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code + '请[重新发起流程](command:理财套餐)');
+				sendMessageToDevice(from_address, 'Status code: ' + status_code + '请[重新发起流程](command:锁仓激励服务)');
 				return;
 			}
 			result.map(function(lockup){
@@ -324,7 +324,7 @@ eventBus.on('text', function(from_address, text){
 		return;
 	}
 
-	sendMessageToDevice(from_address, '您输入的信息无法识别，请重新输入或[重新发起流程](command:理财套餐)\n');
+	sendMessageToDevice(from_address, '您输入的信息无法识别，请重新输入或[重新发起流程](command:锁仓激励服务)\n');
 });
 
 // validate commission and create lockup address
@@ -347,7 +347,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:理财套餐)');
+				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
 				return;
 			}
 			if(!info){
@@ -366,7 +366,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 				db.query('delete from user_status where lockupId=?', [lockupId], function(){
 					console.log('Remove expired lockup, lockupId: '+lockupId);
 				});
-				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:理财套餐)");
+				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:锁仓激励服务)");
 			}
 			// create and store shared address, send result to user and server
 			return sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
