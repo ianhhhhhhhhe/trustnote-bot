@@ -352,7 +352,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 			}
 			if(!info){
 				console.log('Error'+info+'不存在');
-				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员，错误代号:', status_code)
+				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员，错误代号:', lockupId);
 			}
 			var unlock_date = info["unlockTime"];
 			var panicStarttime = info["panicStartTime"];
