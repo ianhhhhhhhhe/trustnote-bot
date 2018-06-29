@@ -68,7 +68,7 @@ function sendGreeting(from_address){
 			return sendMessageToDevice(from_address, '该活动未开启，敬请期待')
 		}
 		// updateLockupMenu(res);
-		var greeting_res = '欢迎进入锁仓激励服务，本活动长期有效。';
+		var greeting_res = '欢迎进入锁仓激励服务。';
 		var lockup_count = res.length;
 		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){

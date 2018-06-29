@@ -19,7 +19,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 	record user order records
 	*/
 	// check unfinished bill
-	db.query('select * from user_status where from_address=? and lockupId=? order by lockupId desc', [from_address, lockupId], function(rows){
+	db.query('select * from user_status where from_address=? and lockupId=?', [from_address, lockupId], function(rows){
 		if(rows.length!==0){
 			db.query('update user_status set amount=? where from_address=? and lockupId=?', [amount, from_address, lockupId], function(){
 				if(rows[0]["sent"]==0){
