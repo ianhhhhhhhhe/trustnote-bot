@@ -42,7 +42,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 				return;
 			});
 		} else {
-			db.query('insert into user_status (from_address, address, amount, lockupId, sent, create_ts) values (?,?,?,?,?,0)', [from_address, address, amount, lockupId, Date.now()], function(){
+			db.query('insert into user_status (from_address, address, amount, lockupId, create_ts, sent) values (?,?,?,?,?,0)', [from_address, address, amount, lockupId, Date.now()], function(){
 				// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 				// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
 				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
