@@ -5,6 +5,6 @@ CREATE TABLE user_status (
 	lockupId INTEGER NOT NULL,
 	shared_address CHAR(32) NULL,
 	sent INTEGER NULL,
-	create_ts INTEGER NOT NULL,
+	create_ts INTEGER NULL,
 	PRIMARY KEY(from_address, lockupId)
 );
