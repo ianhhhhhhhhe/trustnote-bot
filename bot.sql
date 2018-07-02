@@ -5,25 +5,6 @@ CREATE TABLE user_status (
 	lockupId INTEGER NOT NULL,
 	shared_address CHAR(32) NULL,
 	sent INTEGER NULL,
+	create_ts INTEGER NOT NULL,
 	PRIMARY KEY(from_address, lockupId)
-);
-
-CREATE TABLE lockups (
-	financialBenefitsId INTEGER NOT NULL PRIMARY KEY,
-	productName CHAR(32) NULL,
-	activityStatus CHAR(32) NOT NULL,
-	financialId INTEGER NOT NULL,
-	financialRate INTEGER NOT NULL,
-	financialStatus INTEGER NOT NULL,
-	interestStartTime INTEGER NOT NULL,
-	interestEndTime INTEGER NOT NULL,
-	minAmount INTEGER NOT NULL,
-	purchaseLimit INTEGER NULL,
-	panicStartTime INTEGER NOT NULL,
-	panicEndTime INTEGER NOT NULL,
-	nextPanicStartTime INTEGER NULL,
-	nextPanicEndTime INTEGER NULL,
-	panicTotalLimit INTEGER NOT NULL,
-	remainLimit INTEGER NULL,
-	unlockTime INTEGER NOT NULL
 );
