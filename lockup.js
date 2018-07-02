@@ -21,7 +21,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 	// check unfinished bill
 	db.query('select * from user_status where from_address=? and lockupId=?', [from_address, lockupId], function(rows){
 		if(rows.length!==0){
-			db.query('update user_status set amount=? where from_address=? and lockupId=?', [amount, from_address, lockupId], function(){
+			db.query('update user_status set amount=?, create_ts=? where from_address=? and lockupId=?', [amount, Date.now(), from_address, lockupId], function(){
 				if(rows[0]["sent"]==0){
 					// sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓，请支付该手续费后再购买其他套餐');
 					// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
@@ -42,7 +42,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 				return;
 			});
 		} else {
-			db.query('insert into user_status (from_address, address, amount, lockupId, sent) values (?,?,?,?,0)', [from_address, address, amount, lockupId], function(){
+			db.query('insert into user_status (from_address, address, amount, lockupId, sent, create_ts) values (?,?,?,?,0)', [from_address, address, amount, lockupId, Date.now()], function(){
 				// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 				// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
 				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
