@@ -331,7 +331,7 @@ eventBus.on('text', function(from_address, text){
 eventBus.on('received_payment', function(from_address,  amount, asset, message_counter, bToSharedAddress){
     // validate commission and create shared address
 	if(asset!=='base' || amount!==100000) {
-		return sendMessageToDevice(from_address, "手续费不足0.1MN或你所发送资产非TTT");
+		return;
 	}
 	// 查找未完成的合约
 	db.query('select * from user_status where from_address=? and sent=0 order by create_ts desc', [from_address], function(rows){
