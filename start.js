@@ -336,7 +336,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 	// 查找未完成的合约
 	db.query('select * from user_status where from_address=? and sent=0 order by create_ts desc', [from_address], function(rows){
 		if(rows.length===0){
-			return sendMessageToDevice(from_address, '未找到订单信息，请[重新发起流程](command:锁仓激励服务)');
+			return;
 		}
 		var address = rows[0].address;
 		var amount = rows[0].amount;
