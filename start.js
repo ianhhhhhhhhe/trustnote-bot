@@ -247,12 +247,16 @@ eventBus.on('text', function(from_address, text){
 			lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
 			lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
 			lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
-			lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
+			if(info["panicTotalLimit"]<=0){
+				lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
+			} else {
+				lockupDetail += '\n抢购总额度: 无上限\n';
+			}
 			lockupDetail += ('起购额度: ' + util.formatNumbers(info["minAmount"]) + 'MN\n');
 			if(info["purchaseLimit"]){
 				lockupDetail += ('限购额度: ' + util.formatNumbers(info["purchaseLimit"]) + 'MN\n');
 			} else {
-				lockupDetail += '限购额度: 无上限\n'
+				lockupDetail += '限购额度: 无上限\n';
 			}
 			if (info["financialId"]==1){
 				lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
