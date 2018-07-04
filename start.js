@@ -188,7 +188,7 @@ eventBus.on('text', function(from_address, text){
 	if (text.match(/^\d+(MN)?$/i)) {
 		var amount = text.match(/^\d+/)[0];
 		if (!users_status[from_address]) {
-			sendMessageToDevice(from_address, '请先选择套餐');
+			sendMessageToDevice(from_address, '请[先选择套餐](command:锁仓激励服务)');
 			return sendGreeting(from_address);
 		}
 		var myAddress = users_status[from_address]["address"];
@@ -223,6 +223,7 @@ eventBus.on('text', function(from_address, text){
 			if (amount>remain){
 				return sendMessageToDevice(from_address, '剩余额度不足，该套餐剩余额度为：'+( remain>=0 ? remain : 0 )+'MN，请选择更低的购买额度');
 			}
+			users_status[from_address]={};
 			return sendLockups.prePurchaseLockup(from_address, myAddress, amount, myLockupId);
 		});
 		return;
@@ -322,6 +323,7 @@ eventBus.on('text', function(from_address, text){
 
 	// cancel my unfinished bill
 	if (text.match(/^取消未支付手续费的合约$/)){
+		users_status[from_address]=null;
 		db.query('delete from user_status where from_address=? and sent=0', [from_address], function(){
 			sendMessageToDevice(from_address, '已经取消您未支付手续费的合约');
 		});
