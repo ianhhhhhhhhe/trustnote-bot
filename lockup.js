@@ -33,7 +33,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 					network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
 						result.map(function(lockup){
 							if(lockup["sharedAddress"]===rows[0]["shared_address"]){
-								var remain = amount - parseFloat(lockup["lockUpAmount"]);
+								var remain = amount - parseFloat(lockup["lockUpAmount"]?lockup["lockUpAmount"]:0);
 								if(remain <= 0){
 									return sendMessageToDevice(from_address, '你已参加过该活动，请[选择其他套餐或关注下期活动](command:锁仓激励服务)')
 								}

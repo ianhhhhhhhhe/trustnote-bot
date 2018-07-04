@@ -358,7 +358,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 				return;
 			}
 			if(!info){
-				console.log('Error'+info+'不存在');
+				console.log('Error: '+ code + '#' + info+ '#' + lockupId + '不存在');
 				return sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系工作人员，错误代号:' + code + '#' + info+ '#' + lockupId + '并[重新发起流程](command:锁仓激励服务)');
 			}
 			var unlock_date = info["unlockTime"];
