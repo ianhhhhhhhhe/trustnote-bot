@@ -25,7 +25,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 				if(rows[0]["sent"]==0){
 					// sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓，请支付该手续费后再购买其他套餐');
 					// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
-					sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
+					sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证');
 				}
 				if(rows[0]["sent"]==1){
 					// query database and check if client has put required amout into the address
@@ -49,7 +49,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 			db.query('insert into user_status (from_address, address, amount, lockupId, create_ts, sent) values (?,?,?,?,?,0)', [from_address, address, amount, lockupId, Date.now()], function(){
 				// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 				// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
-				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成kyc验证');
+				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证');
 				return;
 			})
 		}

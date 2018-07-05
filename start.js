@@ -130,11 +130,12 @@ eventBus.on('text', function(from_address, text){
 	resumeSession(from_address);
 	text = text.trim();
 	// for debug, to test client's and bot's connection status
-	if (text.match(/hello/i))
-		return sendMessageToDevice(from_address, DEFAULT_GREETING);
+	// if (text.match(/hello/i))
+	// 	return sendMessageToDevice(from_address, DEFAULT_GREETING);
 	// get latest lockup menu
-	if (text.match(/锁仓激励服务/i))
-	    return sendGreeting(from_address);
+	if (text.match(/锁仓激励服务/i)){
+		return sendGreeting(from_address);
+	}
 
 	// pre-purchase lockup
 	if (text.match(/^[A-Z2-7]{32}#\d+$/)) {
@@ -248,7 +249,7 @@ eventBus.on('text', function(from_address, text){
 			lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
 			lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
 			lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
-			if(info["panicTotalLimit"]<=0){
+			if(info["panicTotalLimit"]!=0){
 				lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
 			} else {
 				lockupDetail += '\n抢购总额度: 无上限\n';
