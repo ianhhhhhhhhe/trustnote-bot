@@ -266,9 +266,9 @@ eventBus.on('text', function(from_address, text){
 			var panicStarttime = info["panicStartTime"];
 			var panicEndtime = info["panicEndTime"];
 			// validate activity date
-			if(Date.now() <= panicStarttime){
+			if(info["activityStatus"] == "未开启"){
 				lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
-			} else if(Date.now() >= panicEndtime || info["remainLimit"]<=0){
+			} else if(info["activityStatus"] == "抢购已结束"){
 				// remove expired lockup
 				db.query('delete from user_status where lockupId=?', [lockupId], function(){
 					console.log('Remove expired lockup, lockupId: '+lockupId);
@@ -284,7 +284,7 @@ eventBus.on('text', function(from_address, text){
 				lockupDetail += '\n下期抢购时间: 敬请期待'
 			}
 			sendMessageToDevice(from_address, lockupDetail);
-			if(Date.now() >= panicStarttime && Date.now() < panicEndtime){
+			if(info["activityStatus"]=="抢购进行中"){
 				sendMessageToDevice(from_address, '请点击[#'+ lockupId +'](command:#' + lockupId +')#开始抢购');
 			}
 		})
