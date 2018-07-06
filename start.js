@@ -212,8 +212,8 @@ eventBus.on('text', function(from_address, text){
 				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
 			}
 			var myMinAmount = info["minAmount"];
-			var myMaxAmount = info["purchaseLimit"] ? info["purchaseLimit"]!='null' : Infinity;
-			var remain = info["remainLimit"] ? info["remainLimit"]!='null' : Infinity;
+			var myMaxAmount = info["purchaseLimit"]!='null' ? info["purchaseLimit"] : Infinity;
+			var remain = info["remainLimit"]!='null' ? info["remainLimit"] : Infinity;
 			if (amount<myMinAmount) {
 				return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
 			}
