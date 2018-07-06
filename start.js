@@ -12,7 +12,6 @@ var sendLockups = require('./lockup.js');
 var util = require('./util.js');
 
 const SESSION_TIMEOUT = 600*1000;
-const DEFAULT_GREETING = 'Hello, this is trustnote-bot. How may I help you?'
 var assocSessions = {};
 var lockup_list={};
 var users_status={};
@@ -213,8 +212,8 @@ eventBus.on('text', function(from_address, text){
 				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
 			}
 			var myMinAmount = info["minAmount"];
-			var myMaxAmount = info["purchaseLimit"]
-			var remain = info["remainLimit"];
+			var myMaxAmount = info["purchaseLimit"] ? info["purchaseLimit"]!='null' : Infinity;
+			var remain = info["remainLimit"] ? info["remainLimit"]!='null' : Infinity;
 			if (amount<myMinAmount) {
 				return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
 			}
@@ -249,22 +248,20 @@ eventBus.on('text', function(from_address, text){
 			lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
 			lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
 			lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
-			if(info["panicTotalLimit"]!=0){
+			if(info["panicTotalLimit"]!='null'){
 				lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
 			} else {
 				lockupDetail += '\n抢购总额度: 无上限\n';
 			}
 			lockupDetail += ('起购额度: ' + util.formatNumbers(info["minAmount"]) + 'MN\n');
-			if(info["purchaseLimit"]){
+			if(info["purchaseLimit"]!='null'){
 				lockupDetail += ('限购额度: ' + util.formatNumbers(info["purchaseLimit"]) + 'MN\n');
 			} else {
 				lockupDetail += '限购额度: 无上限\n';
 			}
-			if (info["financialId"]==1){
+			if (info["remainLimit"]!='null'){
 				lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
 			}
-			var panicStarttime = info["panicStartTime"];
-			var panicEndtime = info["panicEndTime"];
 			// validate activity date
 			if(info["activityStatus"] == "未开启"){
 				lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
@@ -335,7 +332,7 @@ eventBus.on('text', function(from_address, text){
 });
 
 // validate commission and create lockup address
-eventBus.on('received_payment', function(from_address,  amount, asset, message_counter, bToSharedAddress){
+eventBus.on('received_payment', function(from_address,  amount, asset){
     // validate commission and create shared address
 	if(asset!=='base' || amount!==100000) {
 		return;
@@ -351,7 +348,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset, message_c
 		if(!lockupId){
 			return sendMessageToDevice(from_address, '未选择锁仓激励服务');
 		}
-		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code, code, hasMore, msg){
+		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code, code){
 			if (error) {
 				console.log('Error: ', error);
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
