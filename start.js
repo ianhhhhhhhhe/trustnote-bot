@@ -244,6 +244,9 @@ eventBus.on('text', function(from_address, text){
 			if (!info){
 				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
 			}
+			if(info["activityStatus"] == "抢购已结束" && info["nextPanicStartTime"]!=null && Date.now()>info["nextPanicStartTime"]){
+				return sendMessageToDevice(from_address, '活动已过期，请重新发起[锁仓激励服务](command:锁仓激励服务)')
+			}
 			var lockupDetail = ('产品名称: ' + info["productName"] +'\n\n');
 			lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
 			lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
