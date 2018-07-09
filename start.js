@@ -368,7 +368,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset){
 			if(Date.now() <= panicStarttime){
 				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
 			}
-			if(Date.now() >= panicEndtime || info["remainLimit"]<=0){
+			if(Date.now() >= panicEndtime || (info["remainLimit"]<=0 && info["remainLimit"]!=null)){
 				// remove expired lockup
 				db.query('delete from user_status where lockupId=?', [lockupId], function(){
 					console.log('Remove expired lockup, lockupId: '+lockupId);
