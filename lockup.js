@@ -25,7 +25,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 				if(rows[0]["sent"]==0){
 					// sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓，请支付该手续费后再购买其他套餐');
 					// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
-					sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证');
+					sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
 				}
 				if(rows[0]["sent"]==1){
 					// query database and check if client has put required amout into the address
@@ -35,7 +35,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 							if(lockup["sharedAddress"]===rows[0]["shared_address"]){
 								var remain = amount - parseFloat(lockup["lockUpAmount"]?lockup["lockUpAmount"]:0);
 								if(remain <= 0){
-									return sendMessageToDevice(from_address, '你已参加过该活动，请[选择其他套餐或关注下期活动](command:锁仓激励服务)')
+									return sendMessageToDevice(from_address, '你已参加过该活动，请选择[其他套餐](command:锁仓激励服务)或关注下期活动')
 								}
 								sendMessageToDevice(from_address, '请['+remain+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+remain*1000000+')以完成锁仓激励计划\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
 								//'本次解锁后的收益为'+rows[0]["amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
@@ -49,7 +49,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 			db.query('insert into user_status (from_address, address, amount, lockupId, create_ts, sent) values (?,?,?,?,?,0)', [from_address, address, amount, lockupId, Date.now()], function(){
 				// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 				// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
-				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证');
+				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
 				return;
 			})
 		}
