@@ -212,12 +212,12 @@ eventBus.on('text', function(from_address, text){
 				return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
 			}
 			var myMinAmount = info["minAmount"];
-			var myMaxAmount = info["purchaseLimit"]!='null' ? info["purchaseLimit"] : Infinity;
-			var remain = info["remainLimit"]!='null' ? info["remainLimit"] : Infinity;
+			var myMaxAmount = info["purchaseLimit"]!=null ? info["purchaseLimit"] : Infinity;
+			var remain = info["remainLimit"]!=null ? info["remainLimit"] : Infinity;
 			if (amount<myMinAmount) {
 				return sendMessageToDevice(from_address, '最低金额不能小于'+myMinAmount+'MN，请重新输入');
 			}
-			if (amount>myMaxAmount && myMaxAmount!=0) {
+			if (amount>myMaxAmount) {
 				return sendMessageToDevice(from_address, '最高金额不能大于'+myMaxAmount+'MN，请重新输入');
 			}
 			if (amount>remain){
@@ -248,18 +248,18 @@ eventBus.on('text', function(from_address, text){
 			lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
 			lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
 			lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
-			if(info["panicTotalLimit"]!='null'){
+			if(info["panicTotalLimit"]!=null){
 				lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
 			} else {
 				lockupDetail += '\n抢购总额度: 无上限\n';
 			}
 			lockupDetail += ('起购额度: ' + util.formatNumbers(info["minAmount"]) + 'MN\n');
-			if(info["purchaseLimit"]!='null'){
+			if(info["purchaseLimit"]!=null){
 				lockupDetail += ('限购额度: ' + util.formatNumbers(info["purchaseLimit"]) + 'MN\n');
 			} else {
 				lockupDetail += '限购额度: 无上限\n';
 			}
-			if (info["remainLimit"]!='null'){
+			if (info["remainLimit"]!=null){
 				lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
 			}
 			// validate activity date
