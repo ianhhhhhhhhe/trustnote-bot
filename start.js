@@ -176,7 +176,7 @@ eventBus.on('text', function(from_address, text){
 				var myAddress = users_status[from_address]["address"]
 				var myLockupId = users_status[from_address]["lockupId"];
 				var myMinAmount = info["minAmount"];
-				return sendLockups.prePurchaseLockup(from_address, myAddress, myMinAmount, myLockupId);
+				return sendLockups.prePurchaseLockup(from_address, myAddress, myMinAmount, myLockupId, myMinAmount);
 			}
 			return sendMessageToDevice(from_address, '请输入抢购数量（例如：25000MN）');
 			// return sendLockups.prePurchaseLockup(from_address, address, amount, lockupId);
