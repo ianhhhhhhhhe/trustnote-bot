@@ -14,7 +14,7 @@ function sendMessageToDevice(device_address, text){
 	device.sendMessageToDevice(device_address, 'text', text);
 }
 
-function prePurchaseLockup(from_address, address, amount, lockupId) {
+function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
 	/*
 	record user order records
 	*/
@@ -33,11 +33,11 @@ function prePurchaseLockup(from_address, address, amount, lockupId) {
 					network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
 						result.map(function(lockup){
 							if(lockup["sharedAddress"]===rows[0]["shared_address"]){
-								var remain = amount - parseFloat(lockup["lockUpAmount"]?lockup["lockUpAmount"]:0);
+								var remain = maxAmount - parseFloat(lockup["lockUpAmount"]?lockup["lockUpAmount"]:0);
 								if(remain <= 0){
 									return sendMessageToDevice(from_address, '你已参加过该活动，请选择[其他套餐](command:锁仓激励服务)或关注下期活动')
 								}
-								sendMessageToDevice(from_address, '请['+remain+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+remain*1000000+')以完成锁仓激励计划\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
+								sendMessageToDevice(from_address, '请['+amount+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+amount*1000000+')以完成锁仓激励计划\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
 								//'本次解锁后的收益为'+rows[0]["amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
 							}
 						})

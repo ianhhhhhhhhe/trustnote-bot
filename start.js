@@ -224,7 +224,7 @@ eventBus.on('text', function(from_address, text){
 				return sendMessageToDevice(from_address, '剩余额度不足，该套餐剩余额度为：'+( remain>=0 ? remain : 0 )+'MN，请选择更低的购买额度');
 			}
 			users_status[from_address]={};
-			return sendLockups.prePurchaseLockup(from_address, myAddress, amount, myLockupId);
+			return sendLockups.prePurchaseLockup(from_address, myAddress, amount, myLockupId, myMaxAmount);
 		});
 		return;
 	}
@@ -364,11 +364,12 @@ eventBus.on('received_payment', function(from_address,  amount, asset){
 			var unlock_date = info["unlockTime"];
 			var panicStarttime = info["panicStartTime"];
 			var panicEndtime = info["panicEndTime"];
+			var remailLimit = info["remainLimit"] == null ? Infinity : info["remainLimit"];
 			// validate activity date
 			if(Date.now() <= panicStarttime){
 				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
 			}
-			if(Date.now() >= panicEndtime || (info["remainLimit"]<=0 && info["remainLimit"]!=null)){
+			if(Date.now() >= panicEndtime || remailLimit<=0){
 				// remove expired lockup
 				db.query('delete from user_status where lockupId=?', [lockupId], function(){
 					console.log('Remove expired lockup, lockupId: '+lockupId);
