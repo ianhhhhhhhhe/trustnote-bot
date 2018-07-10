@@ -110,7 +110,7 @@ eventBus.on('headless_wallet_ready', function(){
 			console.log('Status code: ' + status_code);
 			return;
 		}
-		updateLockupMenu(menu);
+		// updateLockupMenu(menu);
 	});
 });
 
