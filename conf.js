@@ -21,8 +21,8 @@ exports.MAX_AMOUNT_IN_KB = 100;
 
 exports.KEYS_FILENAME = 'keys.json';
 
-exports.TIMESTAMPER_ADDRESS = '4VYYR2YO6NV4NTF572AUBEKJLSTM4J4E';
-exports.server_url = 'https://testactivity.trustnote.org';
-exports.botAddress = '752L4B7Y7WQF3BRFEI2IGIN5RDZE54DM';
+exports.TIMESTAMPER_ADDRESS = '2SATGZDFDXNNJRVZ52O4J6VYTTMO2EZR';
+exports.server_url = 'https://activity.trustnote.org';
+exports.botAddress = 'VTQFOIBG7CW2K3ALFMDTJHIM2YRT5PCC';
 
 console.log('finished faucet conf');
