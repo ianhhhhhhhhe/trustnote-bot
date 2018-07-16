@@ -37,21 +37,6 @@ function sendMessageToDevice(from_address, text){
 //	assocSessions[from_address].ts = Date.now();
 }
 
-function updateLockupMenu(res){
-	// Inital lockup_list
-	lockup_list = {};
-	res.map(function(lockup){
-		lockup_list[lockup["financialBenefitsId"]] = lockup;
-		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockup["financialBenefitsId"], function(info) {
-			lockup_list[lockup["financialBenefitsId"]]["info"] = info;
-		});
-		// lockup_list[lockup["id"]] = lockup;
-		// network.getLockupInfo('/financial-benefits/push.htm', lockup["id"], function(info) {
-		// 	lockup_list[lockup["id"]]["info"] = info;
-		// });
-	})
-}
-
 function sendGreeting(from_address){
 	// get lockup service information
 	network.getLockupMenu('/financial/home.htm', function(res, error, status_code) {
@@ -318,15 +303,6 @@ eventBus.on('text', function(from_address, text){
 				res += ('合约ID：' + lockup["financialBenefitsId"] + '\n');
 				sendMessageToDevice(from_address, res);
 			})
-		});
-		return;
-	}
-
-	// cancel my unfinished bill
-	if (text.match(/^取消未支付手续费的合约$/)){
-		users_status[from_address]=null;
-		db.query('delete from user_status where from_address=? and sent=0', [from_address], function(){
-			sendMessageToDevice(from_address, '已经取消您未支付手续费的合约');
 		});
 		return;
 	}

@@ -73,10 +73,23 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 		}
 		db.query('update user_status set shared_address=?, sent=1 where from_address=? and lockupId=?', [shared_address, from_address, lockupId], function(){
 			// send result to server
-			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, lockupId, amount, function(res){
-				// send result to user
-				// sendMessageToDevice(from_address, '你的合约地址为： '+shared_address+'\n请在活动结束前将资金打入合约内，否则你将不会受到任何利息');
-				// sendMessageToDevice(from_address, '['+amount+' MN](TTT:'+shared_address+'?amount='+amount*1000000+')')
+			if(!shared_address){
+				console.log('Error: no shared address');
+				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:noshaddr');
+			}
+			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, lockupId, amount, function(res, error, status_code, code){
+				if (error) {
+					console.log('Error: ', error);
+					sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+					return;
+				} else if (status_code) {
+					sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+					return;
+				}
+				if(!res){
+					console.log('Error: '+ code + '#' + info+ '#' + lockupId + '不存在');
+					return sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系工作人员，错误代号:' + code + '#' + info+ '#' + lockupId + '并[重新发起流程](command:锁仓激励服务)');
+				}
 				sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延')
 			});
 		});

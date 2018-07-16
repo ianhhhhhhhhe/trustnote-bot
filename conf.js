@@ -10,8 +10,8 @@ exports.bIgnoreUnpairRequests = true;
 exports.storage = 'sqlite';
 
 
-exports.hub = 'raytest.trustnote.org';
-exports.deviceName = 'bot';
+exports.hub = 'activity.trustnote.org';
+exports.deviceName = '锁仓小助手';
 exports.permanent_pairing_secret = '0000';
 exports.control_addresses = ['DEVICE ALLOWED TO CHAT'];
 exports.payout_address = 'WHERE THE MONEY CAN BE SENT TO';
