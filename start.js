@@ -156,7 +156,7 @@ eventBus.on('text', function(from_address, text){
 				"lockupId": lockupId,
 				"unlock_date": unlock_date
 			}
-			if (info["financialId"]==1){
+			if (info["minAmount"] == info["purchaseLimit"]){
 				users_status[from_address]["amount"] = info["minAmount"];
 				var myAddress = users_status[from_address]["address"]
 				var myLockupId = users_status[from_address]["lockupId"];
