@@ -48,7 +48,7 @@ function sendGreeting(from_address){
 			sendMessageToDevice(from_address, 'Status code: ' + status_code);
 			return;
 		}
-		if(res.length===0){
+		if(!res){
 			return sendMessageToDevice(from_address, '该活动未开启，敬请期待')
 		}
 		// updateLockupMenu(res);
@@ -250,6 +250,7 @@ eventBus.on('text', function(from_address, text){
 			if (info["remainLimit"]!=null){
 				lockupDetail += ('剩余额度: ' + (info["remainLimit"] ? util.formatNumbers(info["remainLimit"]) : 0) + 'MN\n');
 			}
+			lockupDetail += '获得TFS数量：收益*' + info["tFans"] +'\n';
 			// validate activity date
 			if(info["activityStatus"] == "未开启"){
 				lockupDetail += ('\n状态: 未开启 \n'); // test: _blue_ -blue- +red+ formal: __blue__ --blue-- ++red++
