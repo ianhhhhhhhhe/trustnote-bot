@@ -27,7 +27,7 @@ function getLockupMenu(api, callback){
         url: url + api,
         method: 'GET',
         headers:{
-            Referer: 'trustnote.org',
+            Referer: 'localhost',
             Origin: 'http://localhost:8080'}
         }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -70,7 +70,7 @@ function getLockupInfo(api, lockupID, callback){
         url: url + api + '?financialBenefitsId=' + lockupID,
         method: 'GET',
         headers:{
-            Referer: 'trustnote.org',
+            Referer: 'localhost',
             Origin: 'http://localhost:8080'}
         }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -113,7 +113,7 @@ function getUserStatus(api, device_address, callback) {
         url: url + api + "?deviceAddress=" + device_address,
         method: 'GET',
         headers:{
-            Referer: 'trustnote.org',
+            Referer: 'localhost',
             Origin: 'http://localhost:8080'}
         }, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -131,10 +131,11 @@ function getUserStatus(api, device_address, callback) {
 }
 
 
-function postUserStatus(api, from_address, shared_address, lockupId, amount, callback) {
+function postUserStatus(api, from_address, shared_address, account_address, lockupId, amount, callback) {
     var json = {
         "sharedAddress": shared_address,
         "deviceAddress": from_address,
+        "walletAddress": account_address,
         "financialBenefitsId": lockupId,
         "orderAmount": amount
     }
@@ -143,7 +144,7 @@ function postUserStatus(api, from_address, shared_address, lockupId, amount, cal
         method: 'POST',
         headers:{
             "Content-Type": "application/json;charset=UTF-8",
-            "Referer": 'trustnote.org',
+            "Referer": 'localhost',
             "Origin": 'http://localhost:8080'},
         body: JSON.stringify(json)
         }, function(error, response, body) {
@@ -166,7 +167,7 @@ function getActivityStatus(api, callback){
         url: url + api,
         method: 'GET',
         headers:{
-            "Referer": 'trustnote.org',
+            "Referer": 'localhost',
             "Origin": 'http://localhost:8080'}
         }, function(error, response, body){
         if (!error && response.statusCode == 200) {

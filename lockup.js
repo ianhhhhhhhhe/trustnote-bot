@@ -77,7 +77,7 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 				console.log('Error: no shared address');
 				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:noshaddr');
 			}
-			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, account_address,lockupId, amount, function(res, error, status_code, code){
+			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, account_address, lockupId, amount, function(res, error, status_code, code){
 				if (error) {
 					console.log('Error: ', error);
 					sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
