@@ -335,7 +335,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset){
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 				return;
 			} else if (status_code) {
-				sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+				sendMessageToDevice(from_address, 'Lockup: '+lockupId +'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
 				return;
 			}
 			if(!info){

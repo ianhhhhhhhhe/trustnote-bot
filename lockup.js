@@ -83,7 +83,7 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 					sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
 					return;
 				} else if (status_code) {
-					sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+					sendMessageToDevice(from_address, 'Shared_address: '+shared_address +' Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
 					return;
 				}
 				if(!res){
