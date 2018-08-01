@@ -329,6 +329,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset){
 			return sendMessageToDevice(from_address, '未选择锁仓激励服务');
 		}
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code, code){
+			console.log('===info===: '+info)
 			if (error) {
 				console.log('Error: ', error);
 				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
@@ -356,6 +357,7 @@ eventBus.on('received_payment', function(from_address,  amount, asset){
 				});
 				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:锁仓激励服务)");
 			}
+			console.log('===device_address===: '+from_address+' will purchase lock up')
 			// create and store shared address, send result to user and server
 			return sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date);
 		});

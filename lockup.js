@@ -90,6 +90,7 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 					console.log('Error: '+ code + '#' + info+ '#' + lockupId + '不存在');
 					return sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系工作人员，错误代号:' + code + '#' + info+ '#' + lockupId + '并[重新发起流程](command:锁仓激励服务)');
 				}
+				console.log('===device_address===: '+from_address+'\'s shared address is '+shared_address)
 				sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延')
 			});
 		});
