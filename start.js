@@ -54,7 +54,7 @@ function sendGreeting(from_address){
 		// updateLockupMenu(res);
 		var greeting_res = '欢迎进入锁仓激励服务。';
 		var lockup_count = res.length;
-		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。收益到账时间为解锁后第二天，周末及节假日顺延。\n';
+		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。参与活动的用户还将获得一定数量的TFans（通证符号为TFS），收益和TFS，收益到账时间为解锁后第二天，周末及节假日顺延。\n';
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
