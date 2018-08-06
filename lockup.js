@@ -31,10 +31,10 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
 					// query database and check if client has put required amout into the address
 					// sendMessageToDevice(from_address, '你已参加过该活动，请选择其他套餐或关注下期活动');
 					network.getUserStatus('/financial-lockup/all.htm', from_address, function(result){
-						let find = false
+						let found = false
 						result.map(function(lockup){
 							if(lockup["sharedAddress"]===rows[0]["shared_address"]){
-								find = true
+								found = true
 								var remain = maxAmount - parseFloat(lockup["lockUpAmount"]?lockup["lockUpAmount"]:0);
 								if(remain <= 0){
 									return sendMessageToDevice(from_address, '你已参加过该活动，请选择[其他套餐](command:锁仓激励服务)或关注下期活动')
@@ -43,8 +43,8 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
 								//'本次解锁后的收益为'+rows[0]["amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
 							}
 						})
-						if(!find) {
-							network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, account_address, lockupId, amount, function(res, error, status_code, code){
+						if(!found) {
+							network.postUserStatus('/financial-lockup/save.htm', from_address, rows[0]["shared_address"], rows[0]["address"], lockupId, amount, function(res, error, status_code, code){
 								if (error) {
 									console.log('Error: ', error);
 									sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
