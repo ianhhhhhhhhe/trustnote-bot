@@ -14,7 +14,7 @@ function sendMessageToDevice(device_address, text){
 	device.sendMessageToDevice(device_address, 'text', text);
 }
 
-function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
+function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, language) {
 	/*
 	record user order records
 	*/
@@ -25,7 +25,15 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
 				if(rows[0]["sent"]==0){
 					// sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓，请支付该手续费后再购买其他套餐');
 					// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
-					sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+					switch(language) {
+						case 'cn':
+						case '中文':
+							sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+							break;
+						default:
+							sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+							break;
+					}
 				}
 				if(rows[0]["sent"]==1){
 					// query database and check if client has put required amout into the address
@@ -58,7 +66,15 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
 									return sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系工作人员，错误代号:' + code + '#' + info+ '#' + lockupId + '并[重新发起流程](command:锁仓激励服务)');
 								}
 								console.log('===device_address===: '+from_address+'\'s shared address is '+shared_address)
-								sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+								switch(language) {
+									case 'cn':
+									case '中文':
+										sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+										break;
+									default:
+										sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+										break;
+								}
 							});
 						}
 					});
@@ -69,7 +85,15 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
 			db.query('insert into user_status (from_address, address, amount, lockupId, create_ts, sent) values (?,?,?,?,?,0)', [from_address, address, amount, lockupId, Date.now()], function(){
 				// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 				// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
-				sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+				switch(language) {
+					case 'cn':
+					case '中文':
+						sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+						break;
+					default:
+						sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+						break;
+				}
 				return;
 			})
 		}
@@ -77,7 +101,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount) {
 	
 }
 
-function purchaseLockup(from_address, account_address, amount, lockupId, unlock_date){
+function purchaseLockup(from_address, account_address, amount, lockupId, unlock_date, language){
 	/*
 	create shared address and send it to user
 	store the result and send it to server
@@ -111,7 +135,15 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 					return sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系工作人员，错误代号:' + code + '#' + info+ '#' + lockupId + '并[重新发起流程](command:锁仓激励服务)');
 				}
 				console.log('===device_address===: '+from_address+'\'s shared address is '+shared_address)
-				sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+				switch(language) {
+					case 'cn':
+					case '中文':
+						sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+						break;
+					default:
+						sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+						break;
+				}
 			});
 		});
 	});
@@ -188,6 +220,7 @@ function getSharedAddress(from_address, address, amount, unlock_date, callback) 
 }
 
 function onError(err){
+	console.log('Error On Composing Joint: ' + err);
 	throw Error(err);
 }
 

@@ -8,3 +8,9 @@ CREATE TABLE user_status (
 	create_ts INTEGER NULL,
 	PRIMARY KEY(from_address, lockupId)
 );
+
+CREATE TABLE states (
+	from_address CHAR(33) NOT NULL,
+	lang CHAR(6) NOT NULL DEFAULT 'en',
+	PRIMARY KEY(from_address)
+);
