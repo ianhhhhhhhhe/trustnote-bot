@@ -26,12 +26,14 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 					// sendMessageToDevice(from_address, '你有笔未支付手续费的锁仓，请支付该手续费后再购买其他套餐');
 					// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
 					switch(language) {
-						case 'cn':
+						case 'chinese':
 						case '中文':
+						case 'cn':
+						case 'CN':
 							sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
 							break;
 						default:
-							sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+							sendMessageToDevice(from_address, 'To complete the KYC verification, please [0.1MN](TTT:'+botAddress+'?amount=100000)');
 							break;
 					}
 				}
@@ -47,7 +49,17 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 								if(remain <= 0){
 									return sendMessageToDevice(from_address, '你已参加过该活动，请选择[其他套餐](command:锁仓激励服务)或关注下期活动')
 								}
-								sendMessageToDevice(from_address, '请['+amount+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
+								switch(language) {
+									case 'chinese':
+									case '中文':
+									case 'cn':
+									case 'CN':
+										sendMessageToDevice(from_address, '请['+amount+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
+										break;
+									default:
+										sendMessageToDevice(from_address, 'Verified.\nPlease ['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')to complete the deposit.\n\nAfter the term ends, the principle, together with the interest will be transferred to your contract address and TFan rewards will be transferred to your wallet on the second business day after review.')
+										break;
+								}
 								//'本次解锁后的收益为'+rows[0]["amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
 							}
 						})
@@ -55,7 +67,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 							network.postUserStatus('/financial-lockup/save.htm', from_address, rows[0]["shared_address"], rows[0]["address"], lockupId, amount, function(res, error, status_code, code){
 								if (error) {
 									console.log('Error: ', error);
-									sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+									sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: 500');
 									return;
 								} else if (status_code) {
 									sendMessageToDevice(from_address, 'Shared_address: '+shared_address +' Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
@@ -63,16 +75,18 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 								}
 								if(!res){
 									console.log('Error: '+ code + '#' + info+ '#' + lockupId + '不存在');
-									return sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系工作人员，错误代号:' + code + '#' + info+ '#' + lockupId + '并[重新发起流程](command:锁仓激励服务)');
+									return sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code:' + code + '#' + info+ '#' + lockupId + 'and [retry](command:LockupServices)');
 								}
 								console.log('===device_address===: '+from_address+'\'s shared address is '+shared_address)
 								switch(language) {
-									case 'cn':
+									case 'chinese':
 									case '中文':
+									case 'cn':
+									case 'CN':
 										sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
 										break;
 									default:
-										sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+										sendMessageToDevice(from_address, 'Verified.\nPlease ['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')to complete the deposit.\n\nAfter the term ends, the principle, together with the interest ('+res["income_amount"]+'MN) will be transferred to your contract address and TFan rewards ('+res['tfans_amount']+') will be transferred to your wallet on the second business day after review.')
 										break;
 								}
 							});
@@ -86,12 +100,14 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 				// sendMessageToDevice(from_address, "from_address: " + from_address + "\naddress: " + address + "\namount: " + amount + "\nLockupId: " + lockupId);
 				// sendMessageToDevice(from_address, '请转账0.1MN到该地址，完成kyc验证: '+botAddress);
 				switch(language) {
-					case 'cn':
+					case 'chinese':
 					case '中文':
+					case 'cn':
+					case 'CN':
 						sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
 						break;
 					default:
-						sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
+						sendMessageToDevice(from_address, 'To complete the KYC verification, please [0.1MN](TTT:'+botAddress+'?amount=100000)');
 						break;
 				}
 				return;
@@ -119,29 +135,31 @@ function purchaseLockup(from_address, account_address, amount, lockupId, unlock_
 			// send result to server
 			if(!shared_address){
 				console.log('Error: no shared address');
-				return sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:noshaddr');
+				return sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: noshaddr');
 			}
 			network.postUserStatus('/financial-lockup/save.htm', from_address, shared_address, account_address, lockupId, amount, function(res, error, status_code, code){
 				if (error) {
 					console.log('Error: ', error);
-					sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+					sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff,code: 500');
 					return;
 				} else if (status_code) {
-					sendMessageToDevice(from_address, 'Shared_address: '+shared_address +' Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+					sendMessageToDevice(from_address, 'Shared_address: '+shared_address +' Status code: ' + status_code +'and [retry](command:LockupServices)');
 					return;
 				}
 				if(!res){
-					console.log('Error: '+ code + '#' + info+ '#' + lockupId + '不存在');
-					return sendMessageToDevice(from_address, '服务号似乎出了点问题，请联系工作人员，错误代号:' + code + '#' + info+ '#' + lockupId + '并[重新发起流程](command:锁仓激励服务)');
+					console.log('Error: '+ code + '#' + info+ '#' + lockupId + 'DoesnotExist');
+					return sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code:' + code + '#' + info+ '#' + lockupId + 'and [retry](command:LockupServices)');
 				}
 				console.log('===device_address===: '+from_address+'\'s shared address is '+shared_address)
 				switch(language) {
-					case 'cn':
+					case 'chinese':
 					case '中文':
+					case 'cn':
+					case 'CN':
 						sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
 						break;
 					default:
-						sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
+						sendMessageToDevice(from_address, 'Verified.\nPlease ['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')to complete the deposit.\n\nAfter the term ends, the principle, together with the interest ('+res["income_amount"]+'MN) will be transferred to your contract address and TFan rewards ('+res['tfans_amount']+') will be transferred to your wallet on the second business day after review.')
 						break;
 				}
 			});
