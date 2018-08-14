@@ -1,6 +1,8 @@
 /*jslint node: true */
 "use strict"
 
+var network = require('./network.js');
+
 function sendMessageToDevice(device_address, text){
 	var device = require('trustnote-common/device.js');
 	device.sendMessageToDevice(device_address, 'text', text);
