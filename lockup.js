@@ -70,7 +70,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 									sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: 500');
 									return;
 								} else if (status_code) {
-									sendMessageToDevice(from_address, 'Shared_address: '+shared_address +' Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+									sendMessageToDevice(from_address, 'Shared_address: '+shared_address +' Status code: ' + status_code +'please [retry](command:LockupSerivces)');
 									return;
 								}
 								if(!res){

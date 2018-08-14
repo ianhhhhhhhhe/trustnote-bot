@@ -57,7 +57,7 @@ eventBus.on('headless_wallet_ready', function(){
 });
 
 function getUserLang(from_address, callback) {
-	db.query("select lang from states where from_address=?", [from_address], function(lang){
+	db.query("select lang from states where from_address=?", [from_address], function(rows){
 		if(rows.length===0) return callback(null)
 		callback(rows[0].lang)
 	})
@@ -169,7 +169,7 @@ eventBus.on('text', function(from_address, text){
 							return;
 						}
 						if (!info){
-							return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
+							return sendMessageToDevice(from_address, 'This term is not online yet, please choose [other terms](command:LockupServices)');
 						}
 						// get unlock date
 						var unlock_date = info["interestEndTime"];
@@ -261,7 +261,7 @@ eventBus.on('text', function(from_address, text){
 						return sendMessageToDevice(from_address, '数据缺失，请[重新发起流程](command:锁仓激励服务)');
 					}
 					if(isNaN(myLockupId)){
-						return sendMessageToDevice(from_address, '套餐ID错误，请[重新发起流程](command:锁仓激励服务)');
+						return sendMessageToDevice(from_address, 'Wrong Lockup ID, please [retry](command:LockupSerivces)');
 					}
 					network.getLockupInfo('/financial-benefits/push_benefitid.htm', myLockupId, function(info, error, status_code){
 						if (error) {
@@ -269,7 +269,7 @@ eventBus.on('text', function(from_address, text){
 							sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: 500');
 							return;
 						} else if (status_code) {
-							sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+							sendMessageToDevice(from_address, 'Status code: ' + status_code +'please [retry](command:LockupSerivces)');
 							return;
 						}
 						if(!info){
@@ -369,11 +369,11 @@ eventBus.on('text', function(from_address, text){
 							sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: 500');
 							return;
 						} else if (status_code) {
-							sendMessageToDevice(from_address, 'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+							sendMessageToDevice(from_address, 'Status code: ' + status_code +'please [retry](command:LockupSerivces)');
 							return;
 						}
 						if (!info){
-							return sendMessageToDevice(from_address, '活动暂未开启，请参与[其他套餐](command:锁仓激励服务)');
+							return sendMessageToDevice(from_address, 'This term is not online yet, please choose [other terms](command:LockupServices)');
 						}
 						if(info["activityStatus"] == "抢购已结束" && info["nextPanicStartTime"]!=null && info["nextPanicStartTime"]!=0 && Date.now()>info["nextPanicStartTime"]){
 							return sendMessageToDevice(from_address, 'This term is over, please choose [other terms](command:LockupServices)')
@@ -495,11 +495,11 @@ eventBus.on('received_payment', function(from_address,  amount, asset){
 							sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: 500');
 							return;
 						} else if (status_code) {
-							sendMessageToDevice(from_address, 'Lockup: '+lockupId +'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
+							sendMessageToDevice(from_address, 'Lockup: '+lockupId +'Status code: ' + status_code +'please [retry](command:LockupSerivces)');
 							return;
 						}
 						if(!info){
-							console.log('Error: '+ code + '#' + info+ '#' + lockupId + '不存在');
+							console.log('Error: '+ code + '#' + info+ '#' + lockupId + 'DoesnotExist');
 							return sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code:' + code + '#' + info+ '#' + lockupId + 'and [retry](command:LockupServices)');
 						}
 						unlock_date = info["unlockTime"];
