@@ -150,7 +150,7 @@ eventBus.on('headless_wallet_ready', function(){
 
 function getUserLang(from_address, callback) {
 	db.query("select lang from states where from_address=?", [from_address], function(rows){
-		if(rows.length===0) return callback(null)
+		if(rows.length===0) return callback('en')
 		callback(rows[0].lang)
 	})
 }
