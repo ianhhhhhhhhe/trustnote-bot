@@ -2,6 +2,7 @@
 "use strict"
 
 var network = require('./network.js');
+var util = require('./util.js');
 
 function sendMessageToDevice(device_address, text){
 	var device = require('trustnote-common/device.js');
