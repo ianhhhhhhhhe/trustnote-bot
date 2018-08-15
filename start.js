@@ -100,12 +100,12 @@ function sendGreeting(from_address){
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
 			res.map(function(lockup) {
-				greeting_res+='['+lockup["financialName"]+lockup["financialRate"]*100+'%]';
+				greeting_res+='['+lockup["financialName"].match(/d+/)+'days, '+lockup["financialRate"]*100+'% p.a.]';
 				greeting_res+='(command:#';
 				greeting_res+=lockup["financialBenefitsId"];
 				greeting_res+=')\n';
 			})
-			greeting_res+='\n++As a promotion, all participants will also receive a certain number of TFans token (symbol: TFS) as a reward.\n\nYour principal, interest and TFS will be paid on the second business day following the day when the term ends.++\n\n';
+			greeting_res+='\nAs a promotion, all participants will also receive a certain number of TFans token (symbol: TFS) as a reward.\n\nYour principal, interest and TFS will be paid on the second business day following the day when the term ends.\n\n';
 			greeting_res+='Limited offer only, '+total_users+' participants saved '+util.formatNumbers(total_amount)+'MNs TTT already, take your deposit opportunities now before they are all sold!';
 			sendMessageToDevice(from_address, greeting_res);
 			// sendMessageToDevice(from_address, DEFAULT_GREETING);
@@ -178,7 +178,11 @@ eventBus.on('text', function(from_address, text){
 	// for debug, to test client's and bot's connection status
 	// if (text.match(/hello/i))
 	// 	return sendMessageToDevice(from_address, DEFAULT_GREETING);
-	// get latest lockup menu
+
+	if (text.match(/^语言|Language$/i)) {
+		return sendMessageToDevice(from_address, 'Please select your language:—[English](command:English)\n（or enter English/english/EN/en）\n—[中文](command:中文)\n（or enter中文/CN/cn）')
+	}
+
 	if (langs.indexOf[text]>=0){
 		updateUserLang(from_address, text, function() {
 			device.sendMessageToDevice(from_address, '');
@@ -498,9 +502,9 @@ eventBus.on('text', function(from_address, text){
 							db.query('delete from user_status where lockupId=?', [lockupId], function(){
 								console.log('Remove expired lockup, lockupId: '+lockupId);
 							});
-							lockupDetail += ('\n状态: ++sold out++ \n'); // _blue_ -blue- +red+
+							lockupDetail += ('\Status: ++sold out++ \n'); // _blue_ -blue- +red+
 						} else {
-							lockupDetail += ('\n状态: --ongoing-- \n'); // _blue_ -blue- +red+
+							lockupDetail += ('\Status: --ongoing-- \n'); // _blue_ -blue- +red+
 						}
 						if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
 							lockupDetail += '\nNext term: '
