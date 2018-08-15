@@ -240,7 +240,8 @@ eventBus.on('text', function(from_address, text){
 						users_status[from_address] = {
 							"address": address,
 							"lockupId": lockupId,
-							"unlock_date": unlock_date
+							"unlock_date": unlock_date,
+							"language": language
 						}
 						if (info["minAmount"] == info["purchaseLimit"]){
 							users_status[from_address]["amount"] = info["minAmount"];
@@ -536,86 +537,40 @@ eventBus.on('received_payment', function(from_address,  amount, asset){
 		var amount = rows[0].amount;
 		var lockupId = rows[0].lockupId;
 		if(!lockupId){
-			return sendMessageToDevice(from_address, 'You should choose a lockup service first.');
+			return sendMessageToDevice(from_address, '未选择锁仓激励服务');
 		}
 		network.getLockupInfo('/financial-benefits/push_benefitid.htm', lockupId, function(info, error, status_code, code){
-			var unlock_date;
-			var panicStarttime;
-			var panicEndtime;
-			var remailLimit;
-			getUserLang(function(language){
-				console.log('===info===: '+info)
-				switch(language) {
-					case 'chinese':
-					case '中文':
-					case 'cn':
-					case 'CN':
-						if (error) {
-							console.log('Error: ', error);
-							sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: 500');
-							return;
-						} else if (status_code) {
-							sendMessageToDevice(from_address, 'Lockup: '+lockupId +'Status code: ' + status_code +'请[重新发起流程](command:锁仓激励服务)');
-							return;
-						}
-						if(!info){
-							console.log('Error: '+ code + '#' + info+ '#' + lockupId + '不存在');
-							return sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code:' + code + '#' + info+ '#' + lockupId + 'and [retry](command:LockupServices)');
-						}
-						unlock_date = info["unlockTime"];
-						panicStarttime = info["panicStartTime"];
-						panicEndtime = info["panicEndTime"];
-						remailLimit = info["remainLimit"] == null ? Infinity : info["remainLimit"];
-						// validate activity date
-						if(Date.now() <= panicStarttime){
-							return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
-						}
-						if(Date.now() >= panicEndtime || remailLimit<=0){
-							// remove expired lockup
-							db.query('delete from user_status where lockupId=?', [lockupId], function(){
-								console.log('Remove expired lockup, lockupId: '+lockupId);
-							});
-							return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:锁仓激励服务)");
-						}
-						console.log('===device_address===: '+from_address+' will purchase lock up')
-						// create and store shared address, send result to user and server
-						sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date, language)
-						break;
-					default:
-						if (error) {
-							console.log('Error: ', error);
-							sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: 500');
-							return;
-						} else if (status_code) {
-							sendMessageToDevice(from_address, 'Lockup: '+lockupId +'Status code: ' + status_code +'please [retry](command:LockupSerivces)');
-							return;
-						}
-						if(!info){
-							console.log('Error: '+ code + '#' + info+ '#' + lockupId + 'DoesnotExist');
-							return sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code:' + code + '#' + info+ '#' + lockupId + 'and [retry](command:LockupServices)');
-						}
-						unlock_date = info["unlockTime"];
-						panicStarttime = info["panicStartTime"];
-						panicEndtime = info["panicEndTime"];
-						remailLimit = info["remainLimit"] == null ? Infinity : info["remainLimit"];
-						// validate activity date
-						if(Date.now() <= panicStarttime){
-							return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
-						}
-						if(Date.now() >= panicEndtime || remailLimit<=0){
-							// remove expired lockup
-							db.query('delete from user_status where lockupId=?', [lockupId], function(){
-								console.log('Remove expired lockup, lockupId: '+lockupId);
-							});
-							return sendMessageToDevice(from_address, "This term is over, please choose [other terms](command:LockupServices)");
-						}
-						console.log('===device_address===: '+from_address+' will purchase lock up')
-						// create and store shared address, send result to user and server
-						sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date, language)
-						break;
-				}
-			})
-			return;
+			console.log('===info===: '+info)
+			if (error) {
+				console.log('Error: ', error);
+				sendMessageToDevice(from_address, 'bot似乎出了点问题，请联系Trustnote工作人员,code:500');
+				return;
+			} else if (status_code) {
+				sendMessageToDevice(from_address, 'Lockup: '+lockupId +'Status code: ' + status_code +', please choose [other terms](command:LockupServices)');
+				return;
+			}
+			if(!info){
+				console.log('Error: '+ code + '#' + info+ '#' + lockupId + 'DoesNotExist');
+				return sendMessageToDevice(from_address, 'This Services seems to have some problems, please contect Trustnote staff, code: ' + code + '#' + info+ '#' + lockupId + ', please choose [other terms](command:LockupServices)');
+			}
+			var unlock_date = info["unlockTime"];
+			var panicStarttime = info["panicStartTime"];
+			var panicEndtime = info["panicEndTime"];
+			var remailLimit = info["remainLimit"] == null ? Infinity : info["remainLimit"];
+			// validate activity date
+			if(Date.now() <= panicStarttime){
+				return sendMessageToDevice(from_address, "该活动未开启，敬请期待");
+			}
+			if(Date.now() >= panicEndtime || remailLimit<=0){
+				// remove expired lockup
+				db.query('delete from user_status where lockupId=?', [lockupId], function(){
+					console.log('Remove expired lockup, lockupId: '+lockupId);
+				});
+				return sendMessageToDevice(from_address, "该活动已结束，请参与[其他套餐](command:锁仓激励服务)");
+			}
+			console.log('===device_address===: '+from_address+' will purchase lock up')
+			// create and store shared address, send result to user and server
+			return sendLockups.purchaseLockup(from_address, address, amount, lockupId, unlock_date, users_status[from_address]["language"]);
 		});
 	});
 });
