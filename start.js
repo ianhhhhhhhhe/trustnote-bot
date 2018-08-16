@@ -57,7 +57,7 @@ function sendGreetingCN(from_address){
 			}
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
-			greeting_res += '当前共有 --'+ util.formatNumbers(total_users)+'人-- 参与， ++已抢购++ --'+util.formatNumbers(total_amount)+'MN-- ，欢迎选择套餐参与\n\n';
+			greeting_res += '当前共有 --'+ util.formatNumbers(total_users)+'人-- 参与， 已抢购 --'+util.formatNumbers(total_amount)+'MN-- ，欢迎选择套餐参与\n\n';
 			res.map(function(lockup) {
 				greeting_res+='['+lockup["financialName"]+lockup["financialRate"]*100+'%]';
 				greeting_res+='(command:#';
@@ -145,12 +145,12 @@ eventBus.on('headless_wallet_ready', function(){
 function getUserLang(from_address, callback) {
 	db.query("select lang from states where from_address=?", [from_address], function(rows){
 		if(rows.length===0) return callback('en')
-		callback(rows[0].lang)
+		return callback(rows[0].lang)
 	})
 }
 
 function updateUserLang(from_address, lang, callback) {
-	db.query("update states set lang=? where from_address=?", [lang, from_address], function(){
+	db.query("insert or ignore into states (lang, from_address) values (?,?)", [lang, from_address], function(){
 		callback()
 	})
 }
