@@ -12,7 +12,7 @@ var sendLockups = require('./lockup.js');
 var util = require('./util.js');
 
 const SESSION_TIMEOUT = 600*1000;
-const langs = ['english', 'Englist', 'EN', 'en', 'chinese', '中文', 'CN', 'cn'];
+const langs = ['english', 'English', 'EN', 'en', 'chinese', '中文', 'CN', 'cn'];
 var assocSessions = {};
 var users_status={};
 
