@@ -180,7 +180,7 @@ eventBus.on('text', function(from_address, text){
 	// 	return sendMessageToDevice(from_address, DEFAULT_GREETING);
 
 	if (text.match(/^语言|Language$/i)) {
-		return sendMessageToDevice(from_address, 'Please select your language:—[English](command:English)\n（or enter English/english/EN/en）\n—[中文](command:中文)\n（or enter中文/CN/cn）')
+		return sendMessageToDevice(from_address, 'Welcome to the TTT High Interest Saver, a deposit service provides high interest with variable terms. Please select your language:\n—[English](command:English)\n（or enter English/english/EN/en）\n—[中文](command:中文)\n（or enter中文/CN/cn）')
 	}
 
 	if (langs.indexOf[text]>=0){
