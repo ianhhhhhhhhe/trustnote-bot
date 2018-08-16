@@ -45,7 +45,7 @@ function sendGreetingCN(from_address){
 		// updateLockupMenu(res);
 		var greeting_res = '';
 		var lockup_count = res.length;
-		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。 ++参与活动的用户还将获得一定数量的TFans（通证符号为TFS），收益和TFS到账时间为解锁后第二天++ ，周末及节假日顺延。\n';
+		greeting_res += '当前共有'+lockup_count+'种套餐，每期都需要提前抢购，抢购时间结束或额度完成，则募集结束。 参与活动的用户还将获得一定数量的TFans（通证符号为TFS），收益和TFS到账时间为解锁后第二天 ，周末及节假日顺延。\n';
 		network.getActivityStatus('/financial-lockup/participate.htm', function(res2, error, status_code){
 			if (error) {
 				console.log('Error: ', error);
@@ -100,7 +100,7 @@ function sendGreeting(from_address){
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
 			res.map(function(lockup) {
-				greeting_res+='['+lockup["financialName"].match(/d+/)+'days, '+lockup["financialRate"]*100+'% p.a.]';
+				greeting_res+='['+lockup["financialName"].match(/\d+/g)+'days, '+lockup["financialRate"]*100+'% p.a.]';
 				greeting_res+='(command:#';
 				greeting_res+=lockup["financialBenefitsId"];
 				greeting_res+=')\n';
