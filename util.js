@@ -90,7 +90,7 @@ function timestampToDateEN(timestamp) {
 		hours = '0' + hours;
 	}
 	// var seconds = datetime.getSeconds()
-	return year + '/' + month + '/' + date + ' ' + hours + ':' + minutes;
+	return month + '/' + date + '/' + year + ' ' + + hours + ':' + minutes;
 }
 
 function formatNumbers(number) {
