@@ -150,8 +150,16 @@ function getUserLang(from_address, callback) {
 }
 
 function updateUserLang(from_address, lang, callback) {
-	db.query("insert or ignore into states (lang, from_address) values (?,?)", [lang, from_address], function(){
-		callback()
+	db.query("select lang from states where from_address=?", [from_address], function(){
+		if(rows.length>0){
+			db.query("update states set lang=? where from_address=?", [lang, from_address], function(){
+				callback()
+			})
+			return
+		}
+		db.query("insert or ignore into states (lang, from_address) values (?,?)", [lang, from_address], function() {
+			callback()
+		})
 	})
 }
 
