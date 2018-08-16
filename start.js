@@ -185,7 +185,7 @@ eventBus.on('text', function(from_address, text){
 
 	if (langs.indexOf(text)>=0){
 		updateUserLang(from_address, text, function() {
-			device.sendMessageToDevice(from_address, '');
+			sendMessageToDevice(from_address, '');
 		})
 		return;
 	}
