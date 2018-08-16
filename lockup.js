@@ -33,7 +33,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 							sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
 							break;
 						default:
-							sendMessageToDevice(from_address, 'To complete the KYC verification, please [0.1MN](TTT:'+botAddress+'?amount=100000)');
+							sendMessageToDevice(from_address, 'To complete the KYC verification, please [0.1MN](TTT:'+botAddress+'?amount=100000)(Please click this address to complete the payment)');
 							break;
 					}
 				}
@@ -107,7 +107,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 						sendMessageToDevice(from_address, '请[0.1MN](TTT:'+botAddress+'?amount=100000)以完成KYC验证（请点击当前地址支付）');
 						break;
 					default:
-						sendMessageToDevice(from_address, 'To complete the KYC verification, please [0.1MN](TTT:'+botAddress+'?amount=100000)');
+						sendMessageToDevice(from_address, 'To complete the KYC verification, please [0.1MN](TTT:'+botAddress+'?amount=100000)(Please click this address to complete the payment)');
 						break;
 				}
 				return;
