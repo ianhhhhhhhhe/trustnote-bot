@@ -368,7 +368,7 @@ eventBus.on('text', function(from_address, text){
 					var myAddress = users_status[from_address]["address"];
 					var myLockupId = parseInt(users_status[from_address]["lockupId"]);
 					if(!myAddress || !myLockupId){
-						return sendMessageToDevice(from_address, '数据缺失，请[重新发起流程](command:锁仓激励服务)');
+						return sendMessageToDevice(from_address, 'Missing some data, please [retry](command:LockupServices)');
 					}
 					if(isNaN(myLockupId)){
 						return sendMessageToDevice(from_address, 'Wrong Lockup ID, please [retry](command:LockupSerivces)');
