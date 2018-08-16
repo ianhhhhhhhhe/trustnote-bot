@@ -507,7 +507,7 @@ eventBus.on('text', function(from_address, text){
 							db.query('delete from user_status where lockupId=?', [lockupId], function(){
 								console.log('Remove expired lockup, lockupId: '+lockupId);
 							});
-							lockupDetail += ('\Status: ++sold out++ \n'); // _blue_ -blue- +red+
+							lockupDetail += ('\Status: ++sold++ ++out++ \n'); // _blue_ -blue- +red+
 						} else {
 							lockupDetail += ('\Status: --ongoing-- \n'); // _blue_ -blue- +red+
 						}
