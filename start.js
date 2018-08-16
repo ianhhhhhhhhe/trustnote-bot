@@ -429,8 +429,8 @@ eventBus.on('text', function(from_address, text){
 							return sendMessageToDevice(from_address, '活动已过期，请重新发起[锁仓激励服务](command:锁仓激励服务)')
 						}
 						var lockupDetail = ('产品名称: ' + info["productName"] +'\n\n');
-						lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
-						lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
+						lockupDetail += ('抢购时间: ' + util.timestampToDate(info["panicStartTime"]) + ' -- ' + util.timestampToDate(info["panicEndTime"]) +'\n');
+						lockupDetail += ('计息时间: ' + util.timestampToDate(info["interestStartTime"]) + ' -- '+ util.timestampToDate(info["interestEndTime"]) +'\n');
 						lockupDetail += ('解锁时间: ' + util.timestampToDate(info["unlockTime"]) +'\n');
 						if(info["panicTotalLimit"]!=null){
 							lockupDetail += ('\n抢购总额度: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
@@ -461,7 +461,7 @@ eventBus.on('text', function(from_address, text){
 						}
 						if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
 							lockupDetail += '\n下期抢购时间: '
-							lockupDetail += (util.timestampToDate(info["nextPanicStartTime"]) + ' - ' + util.timestampToDate(info["nextPanicEndTime"]));
+							lockupDetail += (util.timestampToDate(info["nextPanicStartTime"]) + ' -- ' + util.timestampToDate(info["nextPanicEndTime"]));
 						} else {
 							lockupDetail += '\n下期抢购时间: 敬请期待'
 						}
@@ -489,8 +489,8 @@ eventBus.on('text', function(from_address, text){
 							return sendMessageToDevice(from_address, 'This term is over, please choose [other terms](command:LockupServices)')
 						}
 						var lockupDetail = ('Product Name: ' + info["productName"] +'\n\n');
-						lockupDetail += ('Opening Time: ' + util.timestampToDateEN(info["panicStartTime"]) + ' - ' + util.timestampToDateEN(info["panicEndTime"]) +'\n');
-						lockupDetail += ('Interest Period: ' + util.timestampToDateEN(info["interestStartTime"]) + ' - '+ util.timestampToDateEN(info["interestEndTime"]) +'\n');
+						lockupDetail += ('Opening Time: ' + util.timestampToDateEN(info["panicStartTime"]) + ' -- ' + util.timestampToDateEN(info["panicEndTime"]) +'\n');
+						lockupDetail += ('Interest Period: ' + util.timestampToDateEN(info["interestStartTime"]) + ' -- '+ util.timestampToDateEN(info["interestEndTime"]) +'\n');
 						lockupDetail += ('Maturity Date: ' + util.timestampToDateEN(info["unlockTime"]) +'\n');
 						if(info["panicTotalLimit"]!=null){
 							lockupDetail += ('\nTotal Amount: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
@@ -521,7 +521,7 @@ eventBus.on('text', function(from_address, text){
 						}
 						if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
 							lockupDetail += '\nNext term: '
-							lockupDetail += (util.timestampToDateEN(info["nextPanicStartTime"]) + ' - ' + util.timestampToDateEN(info["nextPanicEndTime"]));
+							lockupDetail += (util.timestampToDateEN(info["nextPanicStartTime"]) + ' -- ' + util.timestampToDateEN(info["nextPanicEndTime"]));
 						} else {
 							lockupDetail += '\nNext term is coming soon!'
 						}

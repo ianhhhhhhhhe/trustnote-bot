@@ -57,7 +57,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 										sendMessageToDevice(from_address, '请['+amount+'MN](TTT:'+rows[0]["shared_address"]+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
 										break;
 									default:
-										sendMessageToDevice(from_address, 'Verified.\nPlease ['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')to complete the deposit.\n\nAfter the term ends, the principle, together with the interest will be transferred to your contract address and TFan rewards will be transferred to your wallet on the second business day after review.')
+										sendMessageToDevice(from_address, 'Verified.\nPlease ['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+') to complete the deposit.\n\nAfter the term ends, the principle, together with the interest will be transferred to your contract address and TFan rewards will be transferred to your wallet on the second business day after review.')
 										break;
 								}
 								//'本次解锁后的收益为'+rows[0]["amount"]+'MN，收益需审核后返还到你的合约地址里，一般T+1到账，周末及节假日顺延');
@@ -86,7 +86,7 @@ function prePurchaseLockup(from_address, address, amount, lockupId, maxAmount, l
 										sendMessageToDevice(from_address, '认证通过\n请['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')以完成锁仓激励计划（请点击当前地址支付）\n\n转多或转少不计入收益，本次解锁后的收益为'+res["income_amount"]+'MN，获得TFS数量为'+res['tfans_amount']+'，收益需审核后返还到你的合约地址里，TFS返回到你的钱包地址，一般T+1到账，周末及节假日顺延')
 										break;
 									default:
-										sendMessageToDevice(from_address, 'Verified.\nPlease ['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+')to complete the deposit.\n\nAfter the term ends, the principle, together with the interest ('+res["income_amount"]+'MN) will be transferred to your contract address and TFan rewards ('+res['tfans_amount']+') will be transferred to your wallet on the second business day after review.')
+										sendMessageToDevice(from_address, 'Verified.\nPlease ['+amount+'MN](TTT:'+shared_address+'?amount='+amount*1000000+') to complete the deposit.\n\nAfter the term ends, the principle, together with the interest ('+res["income_amount"]+'MN) will be transferred to your contract address and TFan rewards ('+res['tfans_amount']+'TFS) will be transferred to your wallet on the second business day after review.')
 										break;
 								}
 							});
