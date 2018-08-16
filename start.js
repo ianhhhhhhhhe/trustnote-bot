@@ -124,12 +124,6 @@ function purgeOldSessions(){
 }
 setInterval(purgeOldSessions, SESSION_TIMEOUT);
 
-function sendMessageToDevice(from_address, text){
-	var device = require('trustnote-common/device.js');
-	device.sendMessageToDevice(from_address, 'text', text);
-//	assocSessions[from_address].ts = Date.now();
-}
-
 eventBus.on('headless_wallet_ready', function(){
 	// get lockup service information
 	if (!conf.admin_email || !conf.from_email){
@@ -185,7 +179,18 @@ eventBus.on('text', function(from_address, text){
 
 	if (langs.indexOf(text)>=0){
 		updateUserLang(from_address, text, function() {
-			sendMessageToDevice(from_address, '');
+			switch(text) {
+				case 'chinese':
+				case '中文':
+				case 'cn':
+				case 'CN':
+					sendGreetingCN(from_address);
+					break;
+				default:
+					sendGreeting(from_address);
+					break;
+			}
+			return;
 		})
 		return;
 	}
