@@ -100,13 +100,13 @@ function sendGreeting(from_address){
 			var total_users = res2["total_user"];
 			var total_amount = res2["total_amount"];
 			res.map(function(lockup) {
-				greeting_res+='['+lockup["financialName"].match(/\d+/g)+'days, '+lockup["financialRate"]*100+'% p.a.]';
+				greeting_res+='['+lockup["financialName"].match(/\d+/g)+' days, '+lockup["financialRate"]*100+'% p.a.]';
 				greeting_res+='(command:#';
 				greeting_res+=lockup["financialBenefitsId"];
 				greeting_res+=')\n';
 			})
 			greeting_res+='\nAs a promotion, all participants will also receive a certain number of TFans token (symbol: TFS) as a reward.\n\nYour principal, interest and TFS will be paid on the second business day following the day when the term ends.\n\n';
-			greeting_res+='Limited offer only, '+total_users+' participants saved '+util.formatNumbers(total_amount)+'MNs TTT already, take your deposit opportunities now before they are all sold!';
+			greeting_res+='Limited offer only, '+total_users+' participants saved '+util.formatNumbers(total_amount)+'MN TTT already, take your deposit opportunities now before they are all sold!';
 			sendMessageToDevice(from_address, greeting_res);
 			// sendMessageToDevice(from_address, DEFAULT_GREETING);
 			assocSessions[from_address].greeting_ts = Date.now();
@@ -389,7 +389,7 @@ eventBus.on('text', function(from_address, text){
 						var myMaxAmount = info["purchaseLimit"]!=null ? info["purchaseLimit"] : Infinity;
 						var remain = info["remainLimit"]!=null ? info["remainLimit"] : Infinity;
 						if (amount<myMinAmount) {
-							return sendMessageToDevice(from_address, 'Minimum amount is'+myMinAmount+'MN, please re-enter');
+							return sendMessageToDevice(from_address, 'Minimum amount is '+myMinAmount+'MN, please re-enter');
 						}
 						if (amount>myMaxAmount) {
 							return sendMessageToDevice(from_address, 'Maximum amount is'+myMaxAmount+'MN, please re-enter');
@@ -489,9 +489,9 @@ eventBus.on('text', function(from_address, text){
 							return sendMessageToDevice(from_address, 'This term is over, please choose [other terms](command:LockupServices)')
 						}
 						var lockupDetail = ('Product Name: ' + info["productName"] +'\n\n');
-						lockupDetail += ('Opening Time: ' + util.timestampToDate(info["panicStartTime"]) + ' - ' + util.timestampToDate(info["panicEndTime"]) +'\n');
-						lockupDetail += ('Interest Period: ' + util.timestampToDate(info["interestStartTime"]) + ' - '+ util.timestampToDate(info["interestEndTime"]) +'\n');
-						lockupDetail += ('Maturity Date: ' + util.timestampToDate(info["unlockTime"]) +'\n');
+						lockupDetail += ('Opening Time: ' + util.timestampToDateEN(info["panicStartTime"]) + ' - ' + util.timestampToDateEN(info["panicEndTime"]) +'\n');
+						lockupDetail += ('Interest Period: ' + util.timestampToDateEN(info["interestStartTime"]) + ' - '+ util.timestampToDateEN(info["interestEndTime"]) +'\n');
+						lockupDetail += ('Maturity Date: ' + util.timestampToDateEN(info["unlockTime"]) +'\n');
 						if(info["panicTotalLimit"]!=null){
 							lockupDetail += ('\nTotal Amount: ' + util.formatNumbers(info["panicTotalLimit"]) + 'MN\n');
 						} else {
@@ -521,7 +521,7 @@ eventBus.on('text', function(from_address, text){
 						}
 						if(info["nextPanicStartTime"] && info["nextPanicEndTime"]){
 							lockupDetail += '\nNext term: '
-							lockupDetail += (util.timestampToDate(info["nextPanicStartTime"]) + ' - ' + util.timestampToDate(info["nextPanicEndTime"]));
+							lockupDetail += (util.timestampToDateEN(info["nextPanicStartTime"]) + ' - ' + util.timestampToDateEN(info["nextPanicEndTime"]));
 						} else {
 							lockupDetail += '\nNext term is coming soon!'
 						}
